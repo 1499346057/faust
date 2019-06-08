@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +40,7 @@ class GroupController {
     }
 
     @GetMapping("/group/{id}")
+    @PreAuthorize("hasAuthority('Emperor')")
     ResponseEntity<?> getGroup(@PathVariable Long id) {
         Optional<Group> group = groupRepository.findById(id);
         return group.map(response -> ResponseEntity.ok().body(response))
