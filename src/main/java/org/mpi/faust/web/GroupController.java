@@ -41,7 +41,7 @@ class GroupController {
 
     @GetMapping("/group/{id}")
     @PreAuthorize("hasAuthority('Emperor')")
-    ResponseEntity<?> getGroup(@PathVariable Long id) {
+    ResponseEntity<?> getGroup(@PathVariable Long id, @AuthenticationPrincipal OAuth2User principal) {
         Optional<Group> group = groupRepository.findById(id);
         return group.map(response -> ResponseEntity.ok().body(response))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
