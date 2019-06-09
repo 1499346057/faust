@@ -57,7 +57,7 @@ class GroupEdit extends Component {
         await fetch('/api/v1/group', {
             method: (item.id) ? 'PUT' : 'POST',
             headers: {
-                'X-XSRF-TOKEN': this.state.csrfToken,
+                //'X-XSRF-TOKEN': this.state.csrfToken,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
