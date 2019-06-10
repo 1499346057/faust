@@ -7,44 +7,26 @@ import { withCookies } from 'react-cookie';
 
 class Home extends Component {
     state = {
-        isLoading: true,
-        isAuthenticated: false,
-        user: undefined
+        user: null
     };
 
     constructor(props) {
         super(props);
-        const {cookies} = props;
-        this.state.csrfToken = cookies.get('XSRF-TOKEN');
-        this.login = this.login.bind(this);
-        this.logout = this.logout.bind(this);
+
     }
 
-    async componentDidMount() {
-        const response = await fetch('/api/v1/user', {credentials: 'include'});
-        const body = await response.text();
-        if (response.status !== 200 || body === '') {
-            this.setState(({isAuthenticated: false}))
-        } else {
-            this.setState({isAuthenticated: true, user: JSON.parse(body)})
+    componentDidMount() {
+        if (typeof window !== 'undefined') {
+            window.addEventListener('storage', this.localStorageUpdated)
+            this.setState({user: JSON.parse(localStorage.getItem("user"))})
         }
     }
 
-    login() {
-        let port = (window.location.port ? ':' + window.location.port : '');
-        if (port === ':3000') {
-            port = ':8080';
+    localStorageUpdated(){
+        if (localStorage.getItem('user')) {
+            this.setState({user: JSON.parse(localStorage.getItem("user"))})
         }
-        window.location.href = '//' + window.location.hostname + port + '/oauth2/authorization/okta';
-    }
-
-    logout() {
-        fetch('/api/v1/logout', {method: 'POST', credentials: 'include',
-            headers: {'X-XSRF-TOKEN': this.state.csrfToken}}).then(res => res.json())
-            .then(response => {
-                window.location.href = response.logoutUrl + "?id_token_hint=" +
-                    response.idToken + "&post_logout_redirect_uri=" + window.location.origin;
-            });
+        this.forceUpdate();
     }
 
     render() {
@@ -52,17 +34,26 @@ class Home extends Component {
             <h2>Welcome, {this.state.user.name}!</h2> :
             <p>Please log in to manage your JUG Tour.</p>;
 
-        const button = this.state.isAuthenticated ?
-            <div>
-                <Button color="link"><Link to="/groups">Manage JUG Tour</Link></Button>
-                <br/>
-                <Button color="link" onClick={this.logout}>Logout</Button>
-            </div> :
-            <Button color="primary" onClick={this.login}>Login</Button>;
+        var button = null;
+        if (this.state.user) {
+            var isEmperor = this.state.user.groups.indexOf("Emperor") >= 0;
+            var isTreasury = this.state.user.groups.indexOf("Treasury") >= 0;
+            if (isEmperor || isTreasury) {
+                button = <Button color="link"><Link to="/issues">Manage issues</Link></Button>;
+            }
+            // button = <div>
+            //     <Button color="link"><Link to="/groups">Manage JUG Tour</Link></Button>
+            //     {this.state.user.groups.indexOf("Emperor") >= 0? "Emperor" : "Not emperor"}
+            //     <br/>
+            //     <Button color="link" onClick={this.logout}>Logout</Button>
+            // </div>
+        }
+        else {
+            button = <Button color="primary" onClick={this.login}>Login</Button>;
+        }
 
         return (
             <div>
-                <AppNavbar/>
                 <Container fluid>
                     {message}
                     {button}

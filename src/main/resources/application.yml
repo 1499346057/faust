@@ -21,6 +21,6 @@ okta:
     scopes: openid,email,profile
 
 
-#logging:
-#  level:
-#    root: DEBUG
+logging:
+  level:
+    root: DEBUG
