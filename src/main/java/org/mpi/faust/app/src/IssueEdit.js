@@ -79,7 +79,7 @@ class IssueEdit extends Component {
         const item = this.state.item;
         const paperList = item.papers ? item.papers.map(paper => {
             // key={paper.id}
-            return <tr>
+            return <tr key={paper.id}>
                 <td>{paper.amount}</td>
                 <td>{paper.value}</td>
             </tr>

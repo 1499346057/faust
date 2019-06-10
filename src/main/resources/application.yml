@@ -4,13 +4,13 @@ server:
 spring:
   resources:
     static-locations: "classpath:/static/"
-  security:
-    oauth2:
-      client:
-        provider:
-          okta:
-            issuerUri: https://dev-589473.okta.com/oauth2/default
-
+#  security:
+#    oauth2:
+#      client:
+#        provider:
+#          okta:
+#            issuerUri: https://dev-589473.okta.com/oauth2/default
+#
 
 okta:
   oauth2:

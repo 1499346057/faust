@@ -13,17 +13,32 @@ class Issues extends Component {
     constructor(props) {
         super(props);
         const {cookies} = props;
-        this.state = {issues: [], csrfToken: cookies.get('XSRF-TOKEN'), isLoading: true};
+        this.state = {issues: [], csrfToken: cookies.get('XSRF-TOKEN'), isLoading: true, user: null};
         this.remove = this.remove.bind(this);
+        this.localStorageUpdated = this.localStorageUpdated.bind(this)
     }
 
-    componentDidMount() {
+
+    async componentDidMount() {
         this.setState({isLoading: true});
 
         fetch('api/v1/treasury/issues', {headers: { 'X-XSRF-TOKEN': this.state.csrfToken}, credentials: 'include'})
             .then(response => response.json())
             .then(data => this.setState({issues: data, isLoading: false}))
             .catch(() => this.props.history.push('/'));
+
+        if (typeof window !== 'undefined') {
+            window.addEventListener('storage', this.localStorageUpdated)
+            this.setState({user: JSON.parse(localStorage.getItem("user"))})
+        }
+    }
+
+
+    localStorageUpdated(){
+        if (localStorage.getItem('user')) {
+            this.setState({user: JSON.parse(localStorage.getItem("user"))})
+        }
+        this.forceUpdate();
     }
 
     async remove(id) {
@@ -48,21 +63,22 @@ class Issues extends Component {
             return <p>Loading...</p>;
         }
 
+        var isEmperor = false;
+        if (this.state.user) {
+            var isEmperor = this.state.user.groups.indexOf("Emperor") >= 0;
+        }
+
         const issueList = issues.map(issue => {
-            const address = `${issue.address || ''} ${issue.city || ''} ${issue.stateOrProvince || ''}`;
+            if (issue.state === "Approved") {
+                return ""
+            }
             return <tr key={issue.id}>
-                <td style={{whiteSpace: 'nowrap'}}>{issue.name}</td>
-                <td>{address}</td>
-                <td>{issue.events.map(event => {
-                    return <div key={event.id}>{new Intl.DateTimeFormat('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: '2-digit'
-                    }).format(new Date(event.date))}: {event.title}</div>
+                <td>{issue.papers.map(paper => {
+                    return <div>{paper.amount} ; {paper.value}</div>
                 })}</td>
                 <td>
                     <ButtonGroup>
-                        <Button size="sm" color="primary" tag={Link} to={"/issues/" + issue.id}>Edit</Button>
+                        {isEmperor?<Button size="sm" color="success" onClick={() => this.handleApprove(issue)}>Approve</Button>:""}
                         <Button size="sm" color="danger" onClick={() => this.remove(issue.id)}>Delete</Button>
                     </ButtonGroup>
                 </td>
@@ -79,10 +95,8 @@ class Issues extends Component {
                     <Table className="mt-4">
                         <thead>
                         <tr>
-                            <th width="20%">Name</th>
-                            <th width="20%">Location</th>
-                            <th>Events</th>
-                            <th width="10%">Actions</th>
+                            <th width="20%">value</th>
+                            <th width="20%">actions</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -92,6 +106,23 @@ class Issues extends Component {
                 </Container>
             </div>
         );
+    }
+
+    async handleApprove(issue) {
+        issue.state = "Approved";
+        await fetch(`/api/v1/treasury/issues/`, {
+            method: 'PUT',
+            headers: {
+                'X-XSRF-TOKEN': this.state.csrfToken,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(issue),
+        }).then(() => {
+            let updatedIssues = [...this.state.issues].filter(i => i.id !== issue.id);
+            this.setState({issues: updatedIssues});
+        });
     }
 }
 

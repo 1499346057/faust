@@ -5,6 +5,7 @@ import org.mpi.faust.model.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
@@ -57,8 +58,11 @@ public class TreasuryController {
     @PutMapping("/issues")
     @PreAuthorize("hasAnyAuthority('Treasury', 'Emperor')")
     ResponseEntity<Issue> modifyIssue(@Valid @RequestBody Issue issue, @AuthenticationPrincipal OAuth2User principal) {
-        if (issue.getState() != IssueState.New && !principal.getAuthorities().contains("Emperor")) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        if (issue.getState() != IssueState.New) {
+            if (principal.getAuthorities().stream().noneMatch((p) -> ((GrantedAuthority) p).getAuthority().equals("Emperor")))
+            {
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
         }
         Issue result = issueRepository.save(issue);
         return ResponseEntity.ok(result);

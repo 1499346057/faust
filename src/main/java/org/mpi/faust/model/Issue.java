@@ -7,8 +7,8 @@ import javax.validation.constraints.Null;
 import java.util.List;
 
 @Data
-//@NoArgsConstructor
-//@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Entity
 @Table(name = "treasury_issues")
@@ -17,7 +17,8 @@ public class Issue {
     @GeneratedValue
     private Long id;
 
-    IssueState state;
+    @Builder.Default
+    IssueState state = IssueState.New;
 
     @OneToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
     private List<Paper> papers;
