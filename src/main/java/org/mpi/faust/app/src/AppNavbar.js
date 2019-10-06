@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import {Button, Collapse, Nav, Navbar, NavbarBrand, NavbarToggler, NavItem, NavLink} from 'reactstrap';
 import { Link } from 'react-router-dom';
+import {authenticationService} from "./authService";
+
 import withCookies from "react-cookie/cjs/withCookies";
 
 class AppNavbar extends Component {
@@ -14,20 +16,19 @@ class AppNavbar extends Component {
         const {cookies} = props;
         this.toggle = this.toggle.bind(this);
 
-        this.state.csrfToken = cookies.get('XSRF-TOKEN');
+
         this.login = this.login.bind(this);
         this.logout = this.logout.bind(this);
+
+        this.state = {
+            currentUser: authenticationService.currentUserValue,
+            users: null,
+            csrfToken: cookies.get('XSRF-TOKEN')
+        };
     }
 
     async componentDidMount() {
-        const response = await fetch('/api/v1/user', {credentials: 'include'});
-        const body = await response.text();
-        if (response.status !== 200 || body === '') {
-            this.setState(({isAuthenticated: false}))
-        } else {
-            this.setState({isAuthenticated: true, user: JSON.parse(body)})
-            localStorage.setItem("user", JSON.stringify(this.state.user))
-        }
+        authenticationService.login();
     }
 
     toggle() {
@@ -44,7 +45,6 @@ class AppNavbar extends Component {
         window.location.href = '//' + window.location.hostname + port + '/oauth2/authorization/okta';
     }
 
-    credentials
     logout() {
         fetch('/api/v1/logout', {method: 'POST', credentials: 'include',
             headers: {'X-XSRF-TOKEN': this.state.csrfToken}}).then(res => res.json())
@@ -52,15 +52,16 @@ class AppNavbar extends Component {
                 window.location.href = response.logoutUrl + "?id_token_hint=" +
                     response.idToken + "&post_logout_redirect_uri=" + window.location.origin;
             });
+        authenticationService.logout();
     }
 
     render() {
         return <Navbar color="dark" dark expand="md">
             <NavbarBrand tag={Link} to="/">Home</NavbarBrand>
             {
-                this.state.isAuthenticated ?
+                this.state.currentUser != null ?
                     <NavbarBrand><Button color="link"
-                                         onClick={this.logout}>Logout, {this.state.user ? this.state.user.name : ""}</Button></NavbarBrand>
+                                         onClick={this.logout}>Logout, {this.state.currentUser.name}</Button></NavbarBrand>
                     :
                     <NavbarBrand><Button color="primary" onClick={this.login}>Login</Button></NavbarBrand>
             }

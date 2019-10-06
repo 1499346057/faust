@@ -1,39 +1,66 @@
 package org.mpi.faust;
 
-import org.mpi.faust.model.Event;
-import org.mpi.faust.model.Group;
-import org.mpi.faust.model.GroupRepository;
+import org.mpi.faust.exception.AppException;
+import org.mpi.faust.model.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.util.Collections;
+import java.util.*;
 import java.util.stream.Stream;
+
+
 
 @Component
 class Initializer implements CommandLineRunner {
 
-    private final GroupRepository repository;
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
-    public Initializer(GroupRepository repository) {
-        this.repository = repository;
+    private final UserRepository userRepository;
+
+    private final AuthorityRepository authorityRepository;
+
+    public Initializer(UserRepository user_repository, AuthorityRepository authorityRepository) {
+        this.userRepository = user_repository;
+        this.authorityRepository = authorityRepository;
     }
 
     @Override
     public void run(String... strings) {
-        Stream.of("Denver JUG", "Utah JUG", "Seattle JUG",
-                "Richmond JUG").forEach(name ->
-                repository.save(new Group(name))
+        Map<AuthorityType, Authority> authorities = new HashMap<AuthorityType, Authority>();
+        Stream.of(AuthorityType.ROLE_EMPEROR, AuthorityType.ROLE_USER, AuthorityType.ROLE_SUPPLIER, AuthorityType.ROLE_TREASURY).forEach(name ->
+                authorities.put(name, authorityRepository.save(new Authority(name)))
         );
 
-        Group djug = repository.findByName("Denver JUG");
-        Event e = Event.builder().title("Full Stack Reactive")
-                .description("Reactive with Spring Boot + React")
-                .date(Instant.parse("2018-12-12T18:00:00.000Z"))
-                .build();
-        djug.setEvents(Collections.singleton(e));
-        repository.save(djug);
+        User user = new User();
+        user.setName("Emperor");
+        user.setUsername("Emperor");
+        user.setPassword("abc");
+        user.setEmail("emp@treasury.com");
+        Authority userRole = authorityRepository.findByName(AuthorityType.ROLE_EMPEROR)
+                .orElseThrow(() -> new AppException("User Role not set."));
+        user.setAuthorities(Collections.singleton(userRole));
+        userRepository.save(user);
 
-        repository.findAll().forEach(System.out::println);
+        user.setName("Treasury");
+        user.setUsername("Treasury");
+        user.setEmail("tres@treasury.com");
+        user.setAuthorities(Collections.singleton(authorities.get(AuthorityType.ROLE_TREASURY)));
+        userRepository.save(user);
+
+        user.setName("Supplier");
+        user.setUsername("Supplier");
+        user.setEmail("supploer@treasury.com");
+        user.setAuthorities(Collections.singleton(authorities.get(AuthorityType.ROLE_SUPPLIER)));
+        userRepository.save(user);
+
+        user.setName("User");
+        user.setUsername("User");
+        user.setEmail("user@treasury.com");
+        user.setAuthorities(Collections.singleton(authorities.get(AuthorityType.ROLE_USER)));
+        userRepository.save(user);
     }
 }

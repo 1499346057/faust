@@ -34,29 +34,29 @@ class Home extends Component {
             <h2>Welcome, {this.state.user.name}!</h2> :
             <p>Please log in to manage your JUG Tour.</p>;
 
-        var button = null;
+        var button1 = null;
+        var button2 = null;
         if (this.state.user) {
             var isEmperor = this.state.user.groups.indexOf("Emperor") >= 0;
             var isTreasury = this.state.user.groups.indexOf("Treasury") >= 0;
+            var isSupplier = this.state.user.groups.indexOf("Supplier") >= 0;
             if (isEmperor || isTreasury) {
-                button = <Button color="link"><Link to="/issues">Manage issues</Link></Button>;
+                button1 = <Button color="link"><Link to="/issues">Manage issues</Link></Button>;
             }
-            // button = <div>
-            //     <Button color="link"><Link to="/groups">Manage JUG Tour</Link></Button>
-            //     {this.state.user.groups.indexOf("Emperor") >= 0? "Emperor" : "Not emperor"}
-            //     <br/>
-            //     <Button color="link" onClick={this.logout}>Logout</Button>
-            // </div>
+            if (isSupplier || isTreasury) {
+                button2 = <Button color="link"><Link to="/supplies">Manage supplies</Link></Button>;
+            }
         }
         else {
-            button = <Button color="primary" onClick={this.login}>Login</Button>;
+            button1 = <Button color="primary" onClick={this.login}>Login</Button>;
         }
 
         return (
             <div>
                 <Container fluid>
                     {message}
-                    {button}
+                    {button1}
+                    {button2}
                 </Container>
             </div>
         );

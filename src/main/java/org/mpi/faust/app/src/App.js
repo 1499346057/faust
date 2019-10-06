@@ -7,6 +7,8 @@ import GroupEdit from "./GroupEdit";
 import AppNavbar from "./AppNavbar";
 import Issues from "./Issues";
 import IssueEdit from "./IssueEdit";
+import Supplies from "./Supplies";
+import SupplyEdit from "./SupplyEdit";
 
 class App extends Component {
   render() {
@@ -17,10 +19,10 @@ class App extends Component {
                 <AppNavbar></AppNavbar>
                 {/*<Switch>*/}
                 <Route path='/' exact={true} component={Home}/>
-                <Route path='/groups' exact={true} component={GroupList}/>
-                <Route path='/groups/:id' component={GroupEdit}/>
                 <Route path='/issues' exact={true} component={Issues}/>
                 <Route path='/issues/:id' component={IssueEdit}/>
+                <Route path='/supplies' exact={true} component={Supplies}/>
+                <Route path='/supplies/:id' component={SupplyEdit}/>
                 {/*</Switch>*/}
             </div>
         </Router>
