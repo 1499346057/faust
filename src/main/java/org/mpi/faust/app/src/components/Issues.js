@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import { Button, ButtonGroup, Container, Table } from 'reactstrap';
 
 
-class Supplys extends Component {
+class Issues extends Component {
     static propTypes = {
         cookies: instanceOf(Cookies).isRequired
     };
@@ -13,7 +13,7 @@ class Supplys extends Component {
     constructor(props) {
         super(props);
         const {cookies} = props;
-        this.state = {supplies: [], csrfToken: cookies.get('XSRF-TOKEN'), isLoading: true, user: null};
+        this.state = {issues: [], csrfToken: cookies.get('XSRF-TOKEN'), isLoading: true, user: null};
         this.remove = this.remove.bind(this);
         this.localStorageUpdated = this.localStorageUpdated.bind(this)
     }
@@ -22,9 +22,9 @@ class Supplys extends Component {
     async componentDidMount() {
         this.setState({isLoading: true});
 
-        fetch('api/v1/treasury/supplies', {headers: { 'X-XSRF-TOKEN': this.state.csrfToken}, credentials: 'include'})
+        fetch('api/v1/treasury/issues', {headers: { 'X-XSRF-TOKEN': this.state.csrfToken}, credentials: 'include'})
             .then(response => response.json())
-            .then(data => this.setState({supplies: data, isLoading: false}))
+            .then(data => this.setState({issues: data, isLoading: false}))
             .catch(() => this.props.history.push('/'));
 
         if (typeof window !== 'undefined') {
@@ -42,7 +42,7 @@ class Supplys extends Component {
     }
 
     async remove(id) {
-        await fetch(`/api/v1/treasury/supplies/${id}`, {
+        await fetch(`/api/v1/treasury/issues/${id}`, {
             method: 'DELETE',
             headers: {
                 'X-XSRF-TOKEN': this.state.csrfToken,
@@ -51,33 +51,33 @@ class Supplys extends Component {
             },
             credentials: 'include'
         }).then(() => {
-            let updatedSupplys = [...this.state.supplies].filter(i => i.id !== id);
-            this.setState({supplies: updatedSupplys});
+            let updatedIssues = [...this.state.issues].filter(i => i.id !== id);
+            this.setState({issues: updatedIssues});
         });
     }
 
     render() {
-        const {supplies, isLoading} = this.state;
+        const {issues, isLoading} = this.state;
 
         if (isLoading) {
             return <p>Loading...</p>;
         }
 
-        var isTreasurer = false;
+        let isEmperor = false;
         if (this.state.user) {
-            isTreasurer = this.state.user.groups.indexOf("Treasury") >= 0;
+            isEmperor = this.state.user.groups.indexOf("Emperor") >= 0;
         }
 
-        const supplyList = supplies.map(supply => {
-            return <tr key={supply.id}>
-                <td>{supply.items.map(item => {
-                    return <div>{item.good} ; {item.price}</div>
+        const issueList = issues.map(issue => {
+            return <tr key={issue.id}>
+                <td>{issue.papers.map(paper => {
+                    return <div>{paper.amount} ; {paper.value}</div>
                 })}</td>
-                <td>{supply.status}</td>
+                <td>{issue.state}</td>
                 <td>
                     <ButtonGroup>
-                        {isTreasurer && supply.status === "New" ?<Button size="sm" color="success" onClick={() => this.handleApprove(supply)}>Approve</Button>:""}
-                        <Button size="sm" color="danger" onClick={() => this.remove(supply.id)}>Delete</Button>
+                        {isEmperor && issue.state === "New" ?<Button size="sm" color="success" onClick={() => this.handleApprove(issue)}>Approve</Button>:""}
+                        <Button size="sm" color="danger" onClick={() => this.remove(issue.id)}>Delete</Button>
                     </ButtonGroup>
                 </td>
             </tr>
@@ -87,19 +87,19 @@ class Supplys extends Component {
             <div>
                 <Container fluid>
                     <div className="float-right">
-                        <Button color="success" tag={Link} to="/supplies/new">Add Supply</Button>
+                        <Button color="success" tag={Link} to="/issues/new">Add Issue</Button>
                     </div>
-                    <h3>Supply management management</h3>
+                    <h3>Issue management</h3>
                     <Table className="mt-4">
                         <thead>
                         <tr>
-                            <th width="20%">items</th>
-                            <th width="20%">status</th>
+                            <th width="20%">value</th>
+                            <th width="20%">state</th>
                             <th width="20%">actions</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {supplyList}
+                        {issueList}
                         </tbody>
                     </Table>
                 </Container>
@@ -107,9 +107,9 @@ class Supplys extends Component {
         );
     }
 
-    async handleApprove(supply) {
-        supply.state = "Approved";
-        await fetch(`/api/v1/treasury/supplies/`+supply.id, {
+    async handleApprove(issue) {
+        issue.state = "Approved";
+        await fetch(`/api/v1/treasury/issues/`, {
             method: 'PUT',
             headers: {
                 'X-XSRF-TOKEN': this.state.csrfToken,
@@ -117,12 +117,12 @@ class Supplys extends Component {
                 'Content-Type': 'application/json'
             },
             credentials: 'include',
-            body: JSON.stringify(supply),
+            body: JSON.stringify(issue),
         }).then(() => {
-            let updatedSupplys = [...this.state.supplies].map(i => (i.id == supply.id) ? (i.status = "Approved", i) : (i));
-            this.setState({supplies: updatedSupplys});
+            let updatedIssues = [...this.state.issues].map(i => (i.id === issue.id) ? (i.status = "Approved", i) : (i));
+            this.setState({issues: updatedIssues});
         });
     }
 }
 
-export default withCookies(withRouter(Supplys));
+export default withCookies(withRouter(Issues));

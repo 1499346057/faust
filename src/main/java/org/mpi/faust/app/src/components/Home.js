@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import './App.css';
-import AppNavbar from './AppNavbar';
+import '../App.css';
 import { Link } from 'react-router-dom';
 import { Button, Container } from 'reactstrap';
 import { withCookies } from 'react-cookie';
@@ -9,11 +8,6 @@ class Home extends Component {
     state = {
         user: null
     };
-
-    constructor(props) {
-        super(props);
-
-    }
 
     componentDidMount() {
         if (typeof window !== 'undefined') {
@@ -48,7 +42,7 @@ class Home extends Component {
             }
         }
         else {
-            button1 = <Button color="primary" onClick={this.login}>Login</Button>;
+            button1 = <Button color="primary" tag={Link} to="/login">Login</Button>;
         }
 
         return (

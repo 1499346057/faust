@@ -9,11 +9,17 @@ export const authenticationService = {
     get currentUserValue () { return currentUserSubject.value }
 };
 
-function login() {
-    return fetch('/api/v1/user', {credentials: 'include'})
+function login(body) {
+    return fetch('/api/auth/signin', {
+        method: 'POST',
+        body: JSON.stringify(body),
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
         .then(handleResponse)
         .then(user => {
-            localStorage.setItem("user", JSON.stringify(user));
+            localStorage.setItem("accessToken", JSON.stringify(user.accessToken));
             currentUserSubject.next(user);
             return user;
         });
@@ -26,8 +32,7 @@ function logout() {
 }
 
 function handleResponse(response) {
-    return response.text().then(text => {
-        const data = text && JSON.parse(text);
+    return response.json().then(data => {
         if (!response.ok) {
             if ([401, 403].indexOf(response.status) !== -1) {
                 // auto logout if 401 Unauthorized or 403 Forbidden response returned from api
