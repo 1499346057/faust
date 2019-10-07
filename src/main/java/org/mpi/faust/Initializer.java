@@ -7,7 +7,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -35,32 +34,43 @@ class Initializer implements CommandLineRunner {
                 authorities.put(name, authorityRepository.save(new Authority(name)))
         );
 
-        User user = new User();
-        user.setName("Emperor");
-        user.setUsername("Emperor");
-        user.setPassword("abc");
-        user.setEmail("emp@treasury.com");
+        List<User> users = new ArrayList<>();
+
+        User emperor = new User();
+        emperor.setName("Emperor");
+        emperor.setUsername("Emperor");
+        emperor.setPassword(passwordEncoder.encode("abc"));
+        emperor.setEmail("emp@treasury.com");
         Authority userRole = authorityRepository.findByName(AuthorityType.ROLE_EMPEROR)
                 .orElseThrow(() -> new AppException("User Role not set."));
-        user.setAuthorities(Collections.singleton(userRole));
-        userRepository.save(user);
+        emperor.setAuthorities(Collections.singleton(userRole));
+        users.add(emperor);
 
-        user.setName("Treasury");
-        user.setUsername("Treasury");
-        user.setEmail("tres@treasury.com");
-        user.setAuthorities(Collections.singleton(authorities.get(AuthorityType.ROLE_TREASURY)));
-        userRepository.save(user);
+        User treasury = new User();
+        treasury.setName("Treasury");
+        treasury.setUsername("Treasury");
+        treasury.setPassword(passwordEncoder.encode("abc"));
+        treasury.setEmail("tres@treasury.com");
+        treasury.setAuthorities(Collections.singleton(authorities.get(AuthorityType.ROLE_TREASURY)));
+        users.add(treasury);
 
-        user.setName("Supplier");
-        user.setUsername("Supplier");
-        user.setEmail("supploer@treasury.com");
-        user.setAuthorities(Collections.singleton(authorities.get(AuthorityType.ROLE_SUPPLIER)));
-        userRepository.save(user);
+        User supplier = new User();
+        supplier.setName("Supplier");
+        supplier.setUsername("Supplier");
+        supplier.setPassword(passwordEncoder.encode("abc"));
+        supplier.setEmail("supploer@treasury.com");
+        supplier.setAuthorities(Collections.singleton(authorities.get(AuthorityType.ROLE_SUPPLIER)));
+        users.add(supplier);
 
+        User user = new User();
         user.setName("User");
         user.setUsername("User");
+        user.setPassword(passwordEncoder.encode("abc"));
         user.setEmail("user@treasury.com");
         user.setAuthorities(Collections.singleton(authorities.get(AuthorityType.ROLE_USER)));
-        userRepository.save(user);
+        users.add(user);
+
+        userRepository.saveAll(users);
+
     }
 }

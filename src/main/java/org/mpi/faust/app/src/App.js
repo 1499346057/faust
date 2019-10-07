@@ -1,14 +1,13 @@
 import React, { Component } from 'react';
 import './App.css';
-import Home from './Home';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import GroupList from './GroupList';
-import GroupEdit from "./GroupEdit";
-import AppNavbar from "./AppNavbar";
-import Issues from "./Issues";
-import IssueEdit from "./IssueEdit";
-import Supplies from "./Supplies";
-import SupplyEdit from "./SupplyEdit";
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+import Home from './components/Home';
+import Login from "./components/Login";
+import AppNavbar from "./components/AppNavbar";
+import Issues from "./components/Issues";
+import IssueEdit from "./components/IssueEdit";
+import Supplies from "./components/Supplies";
+import SupplyEdit from "./components/SupplyEdit";
 
 class App extends Component {
   render() {
@@ -17,13 +16,12 @@ class App extends Component {
         <Router>
             <div>
                 <AppNavbar></AppNavbar>
-                {/*<Switch>*/}
                 <Route path='/' exact={true} component={Home}/>
+                <Route path='/login' exact={true} component={Login}/>
                 <Route path='/issues' exact={true} component={Issues}/>
                 <Route path='/issues/:id' component={IssueEdit}/>
                 <Route path='/supplies' exact={true} component={Supplies}/>
                 <Route path='/supplies/:id' component={SupplyEdit}/>
-                {/*</Switch>*/}
             </div>
         </Router>
     )

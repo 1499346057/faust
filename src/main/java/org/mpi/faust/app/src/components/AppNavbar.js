@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import {Button, Collapse, Nav, Navbar, NavbarBrand, NavbarToggler, NavItem, NavLink} from 'reactstrap';
+import {Button, Navbar, NavbarBrand} from 'reactstrap';
 import { Link } from 'react-router-dom';
-import {authenticationService} from "./authService";
+import {authenticationService} from "../common/authService";
 
 import withCookies from "react-cookie/cjs/withCookies";
 
@@ -60,10 +60,17 @@ class AppNavbar extends Component {
             <NavbarBrand tag={Link} to="/">Home</NavbarBrand>
             {
                 this.state.currentUser != null ?
-                    <NavbarBrand><Button color="link"
-                                         onClick={this.logout}>Logout, {this.state.currentUser.name}</Button></NavbarBrand>
+                    <NavbarBrand>
+                        <Button color="link" onClick={this.logout}>
+                            Logout, {this.state.currentUser.name}
+                        </Button>
+                    </NavbarBrand>
                     :
-                    <NavbarBrand><Button color="primary" onClick={this.login}>Login</Button></NavbarBrand>
+                    <NavbarBrand>
+                        <Button color="primary" tag={Link} to="/login">
+                            Login
+                        </Button>
+                    </NavbarBrand>
             }
         </Navbar>;
     }

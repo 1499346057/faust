@@ -1,18 +1,17 @@
 import {instanceOf} from 'prop-types';
 import {Cookies, withCookies} from 'react-cookie';
 import React, {Component} from 'react';
-import {Link, withRouter} from 'react-router-dom';
-import {Button, ButtonGroup, Container, Form, FormGroup, Input, Label, Table} from 'reactstrap';
-import AppNavbar from './AppNavbar';
+import {withRouter} from 'react-router-dom';
+import {Button, Container, Form, FormGroup, Input, Label, Table} from 'reactstrap';
 
-class IssueEdit extends React.Component {
+class IssueEdit extends Component {
     static propTypes = {
         cookies: instanceOf(Cookies).isRequired
     };
 
     emptyItem = {
-        papers: [],
-        state: "New"
+        items: [],
+        status: "New"
     };
 
     constructor(props) {
@@ -20,7 +19,7 @@ class IssueEdit extends React.Component {
         const {cookies} = props;
         this.state = {
             item: this.emptyItem,
-            paper: {},
+            supply: {},
             csrfToken: cookies.get('XSRF-TOKEN')
         };
         this.handleChange = this.handleChange.bind(this);
@@ -31,8 +30,8 @@ class IssueEdit extends React.Component {
     async componentDidMount() {
         if (this.props.match.params.id !== 'new') {
             try {
-                const issue = await (await fetch(`/api/v1/treasury/issues/${this.props.match.params.id}`, {credentials: 'include'})).json();
-                this.setState({item: issue});
+                const supply = await (await fetch(`/api/v1/treasury/supplies/${this.props.match.params.id}`, {credentials: 'include'})).json();
+                this.setState({item: supply});
             } catch (error) {
                 this.props.history.push('/');
             }
@@ -40,11 +39,11 @@ class IssueEdit extends React.Component {
     }
 
     handleAdd(event) {
-        const paper = this.state.paper;
-        const papers = this.state.item.papers;
-        papers.push(paper);
-        const item = this.state.item;
-        item.papers = papers;
+        var supply = this.state.supply;
+        var supplies = this.state.item.items;
+        supplies.push(supply);
+        var item = this.state.item;
+        item.items = supplies;
         this.setState(item);
     }
 
@@ -52,39 +51,39 @@ class IssueEdit extends React.Component {
         const target = event.target;
         const value = target.value;
         const name = target.name;
-        let paper = {...this.state.paper};
-        paper[name] = value;
-        this.setState({paper});
+        let supply = {...this.state.supply};
+        supply[name] = value;
+        this.setState({supply});
     }
 
     async handleSubmit(event) {
         event.preventDefault();
-        const {item, csrfToken} = this.state;
+        const {item,} = this.state;
 
-        await fetch('/api/v1/treasury/issues', {
+        await fetch('/api/v1/treasury/supplies', {
             method: 'POST',
             headers: {
-                //'X-XSRF-TOKEN': this.state.csrfToken,
+                'X-XSRF-TOKEN': this.state.csrfToken,   // ???
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(item),
-            //credentials: 'include'
+            credentials: 'include'
         });
-        this.props.history.push('/issues');
+        this.props.history.push('/supplies');
     }
 
     render() {
-        const paper = this.state.paper;
+        const supply = this.state.supply;
         const item = this.state.item;
-        const paperList = item.papers ? item.papers.map(paper => {
-            // key={paper.id}
-            return <tr key={paper.id}>
-                <td>{paper.amount}</td>
-                <td>{paper.value}</td>
+        const supplyList = item.items ? item.items.map(supplyItem => {
+            // key={supply.id}
+            return <tr key={supplyItem.id}>
+                <td>{supplyItem.good}</td>
+                <td>{supplyItem.price}</td>
             </tr>
         }) : "";
-        const title = <h2>{item.id ? 'Edit issue' : 'Add Issue'}</h2>;
+        const title = <h2>{item.id ? 'Edit supply' : 'Add supply'}</h2>;
 
         return <div>
             <Container>
@@ -92,13 +91,13 @@ class IssueEdit extends React.Component {
                 <Form>
                     <div className="row">
                         <FormGroup className="col-md-4 mb-3">
-                            <Label for="value">Amount</Label>
-                            <Input type="text" name="amount" id="amount" value={paper.amount || ''}
+                            <Label for="good">Good</Label>
+                            <Input type="text" name="good" id="good" value={supply.good || ''}
                                    onChange={this.handleChange} autoComplete="name"/>
                         </FormGroup>
                         <FormGroup className="col-md-4 mb-3">
-                            <Label for="value">Value</Label>
-                            <Input type="text" name="value" id="value" value={paper.value || ''}
+                            <Label for="price">price</Label>
+                            <Input type="text" name="price" id="price" value={supply.price || ''}
                                    onChange={this.handleChange} autoComplete="address-level1"/>
                         </FormGroup>
                         <FormGroup className="col-md-4 mb-3">
@@ -109,12 +108,12 @@ class IssueEdit extends React.Component {
                 <Table className="mt-4">
                     <thead>
                     <tr>
-                        <th width="50%">Amount</th>
-                        <th width="50%">Value</th>
+                        <th width="50%">Good</th>
+                        <th width="50%">Price</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {paperList}
+                    {supplyList}
                     </tbody>
                 </Table>
                 <Button color="primary" onClick={this.handleSubmit}>Commit</Button>{' '}
