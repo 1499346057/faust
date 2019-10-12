@@ -1,6 +1,7 @@
 import React from "react";
 import {Button, Container, Form, Input, Label} from "reactstrap";
-import {authenticationService} from "../common/authService";
+import {login} from "../util/APIUtils";
+import {ACCESS_TOKEN} from "../constants";
 
 class Login extends React.Component{
 
@@ -13,7 +14,7 @@ class Login extends React.Component{
 
         this.handleUsernameChange = this.handleUsernameChange.bind(this);
         this.handlePasswordChange = this.handlePasswordChange.bind(this);
-        this.login = this.login.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
     }
 
     handleUsernameChange(event) {
@@ -24,12 +25,28 @@ class Login extends React.Component{
         this.setState({password: event.target.value});
     }
 
-    login() {
+    handleSubmit() {
         const body = {
             username: this.state.username,
             password: this.state.password
         };
-        authenticationService.login(body);
+        login(body)
+            .then(response => {
+                localStorage.setItem(ACCESS_TOKEN, response.accessToken);
+                this.props.onLogin();
+            }).catch(error => {
+            if(error.status === 401) {
+                // notification.error({
+                //     message: 'Polling App',
+                //     description: 'Your Username or Password is incorrect. Please try again!'
+                // });
+            } else {
+                // notification.error({
+                //     message: 'Polling App',
+                //     description: error.message || 'Sorry! Something went wrong. Please try again!'
+                // });
+            }
+        });
     }
 
     render() {
@@ -54,7 +71,7 @@ class Login extends React.Component{
                             onChange={this.handlePasswordChange}
                         />
                     </Label>
-                    <Button onClick={this.login}>Submit</Button>
+                    <Button onClick={this.handleSubmit}>Submit</Button>
                 </Form>
             </Container>
         );

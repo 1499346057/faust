@@ -1,14 +1,18 @@
 package org.mpi.faust.payload;
 
+import java.util.List;
+
 public class UserSummary {
     private Long id;
     private String username;
     private String name;
+    private List<String> groups;
 
-    public UserSummary(Long id, String username, String name) {
+    public UserSummary(Long id, String username, String name, List<String> groups) {
         this.id = id;
         this.username = username;
         this.name = name;
+        this.groups = groups;
     }
 
     public Long getId() {
@@ -34,4 +38,10 @@ public class UserSummary {
     public void setName(String name) {
         this.name = name;
     }
+
+    public void setGroups(List<String> groups) {
+        this.groups = groups;
+    }
+
+    public List<String> getGroups() { return this.groups; }
 }

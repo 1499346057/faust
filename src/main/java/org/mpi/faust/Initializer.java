@@ -37,9 +37,9 @@ class Initializer implements CommandLineRunner {
         List<User> users = new ArrayList<>();
 
         User emperor = new User();
-        emperor.setName("Emperor");
-        emperor.setUsername("Emperor");
-        emperor.setPassword(passwordEncoder.encode("abc"));
+        emperor.setName("emperor");
+        emperor.setUsername("emperor");
+        emperor.setPassword(passwordEncoder.encode("123"));
         emperor.setEmail("emp@treasury.com");
         Authority userRole = authorityRepository.findByName(AuthorityType.ROLE_EMPEROR)
                 .orElseThrow(() -> new AppException("User Role not set."));
@@ -47,25 +47,25 @@ class Initializer implements CommandLineRunner {
         users.add(emperor);
 
         User treasury = new User();
-        treasury.setName("Treasury");
-        treasury.setUsername("Treasury");
-        treasury.setPassword(passwordEncoder.encode("abc"));
+        treasury.setName("treasury");
+        treasury.setUsername("treasury");
+        treasury.setPassword(passwordEncoder.encode("123"));
         treasury.setEmail("tres@treasury.com");
         treasury.setAuthorities(Collections.singleton(authorities.get(AuthorityType.ROLE_TREASURY)));
         users.add(treasury);
 
         User supplier = new User();
-        supplier.setName("Supplier");
-        supplier.setUsername("Supplier");
-        supplier.setPassword(passwordEncoder.encode("abc"));
-        supplier.setEmail("supploer@treasury.com");
+        supplier.setName("supplier");
+        supplier.setUsername("supplier");
+        supplier.setPassword(passwordEncoder.encode("123"));
+        supplier.setEmail("supplier@treasury.com");
         supplier.setAuthorities(Collections.singleton(authorities.get(AuthorityType.ROLE_SUPPLIER)));
         users.add(supplier);
 
         User user = new User();
-        user.setName("User");
-        user.setUsername("User");
-        user.setPassword(passwordEncoder.encode("abc"));
+        user.setName("user");
+        user.setUsername("user");
+        user.setPassword(passwordEncoder.encode("123"));
         user.setEmail("user@treasury.com");
         user.setAuthorities(Collections.singleton(authorities.get(AuthorityType.ROLE_USER)));
         users.add(user);

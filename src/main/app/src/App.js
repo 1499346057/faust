@@ -9,23 +9,108 @@ import IssueEdit from "./components/IssueEdit";
 import Supplies from "./components/Supplies";
 import SupplyEdit from "./components/SupplyEdit";
 
-class App extends Component {
-  render() {
-    return (
 
-        <Router>
+import { getCurrentUser } from './util/APIUtils';
+
+import {ACCESS_TOKEN} from "./constants";
+
+import Container from "reactstrap/es/Container";
+import LoadingIndicator from "./common/LoadingIndicator";
+
+
+class App extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            currentUser: null,
+            isAuthenticated: false,
+            isLoading: true
+        }
+        this.handleLogout = this.handleLogout.bind(this);
+        this.loadCurrentUser = this.loadCurrentUser.bind(this);
+        this.handleLogin = this.handleLogin.bind(this);
+    }
+
+    loadCurrentUser() {
+        this.setState({
+            isLoading: true
+        });
+        getCurrentUser()
+            .then(response => {
+                this.setState({
+                    currentUser: response,
+                    isAuthenticated: true,
+                    isLoading: false
+                });
+            }).catch(error => {
+            this.setState({
+                isLoading: false
+            });
+        });
+    }
+
+    componentDidMount() {
+        this.loadCurrentUser();
+    }
+
+    // Handle Logout, Set currentUser and isAuthenticated state which will be passed to other components
+    handleLogout(redirectTo="/") {
+        localStorage.removeItem(ACCESS_TOKEN);
+
+        this.setState({
+            currentUser: null,
+            isAuthenticated: false
+        });
+
+        this.props.history.push(redirectTo);
+    }
+
+    /*
+     This method is called by the Login component after successful handleSubmit
+     so that we can load the logged-in user details and set the currentUser &
+     isAuthenticated state, which other components will use to render their JSX
+    */
+    handleLogin() {
+        this.loadCurrentUser();
+        this.props.history.push("/");
+    }
+
+  render() {
+      if(this.state.isLoading) {
+          return <LoadingIndicator />
+      }
+    return (
             <div>
-                <AppNavbar></AppNavbar>
-                <Route path='/' exact={true} component={Home}/>
-                <Route path='/login' exact={true} component={Login}/>
-                <Route path='/issues' exact={true} component={Issues}/>
-                <Route path='/issues/:id' component={IssueEdit}/>
-                <Route path='/supplies' exact={true} component={Supplies}/>
-                <Route path='/supplies/:id' component={SupplyEdit}/>
+                <div className="app-container">
+                    <AppNavbar isAuthenticated={this.state.isAuthenticated}
+                               currentUser={this.state.currentUser}
+                               onLogout={this.handleLogout} />
+                    <div className="app-content">
+                        <Route exact path="/"
+                               render={(props) => <Home isAuthenticated={this.state.isAuthenticated}
+                                                            currentUser={this.state.currentUser} handleLogout={this.handleLogout} {...props} />}>
+                        </Route>
+                        <Route path='/login' exact={true} render={(props) => <Login onLogin={this.handleLogin} {...props} />} />
+                    </div>
+                </div>
             </div>
-        </Router>
     )
   }
 }
+
+/*
+
+{/!*<Router>*!/}
+{/!*    <div>*!/}
+{/!*        <AppNavbar></AppNavbar>*!/}
+{/!*        <Route path='/' exact={true} component={Home}/>*!/}
+{/!*        <Route path='/handleSubmit' exact={true} component={Login}/>*!/}
+{/!*        <Route path='/issues' exact={true} component={Issues}/>*!/}
+{/!*        <Route path='/issues/:id' component={IssueEdit}/>*!/}
+{/!*        <Route path='/supplies' exact={true} component={Supplies}/>*!/}
+{/!*        <Route path='/supplies/:id' component={SupplyEdit}/>*!/}
+{/!*    </div>*!/}
+{/!*</Router>*!/}
+*/
 
 export default App;

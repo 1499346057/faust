@@ -1,6 +1,6 @@
 import { BehaviorSubject } from 'rxjs';
 
-const currentUserSubject = new BehaviorSubject(JSON.parse(localStorage.getItem('currentUser')));
+const currentUserSubject = new BehaviorSubject(JSON.parse(localStorage.getItem('accessToken')));
 
 export const authenticationService = {
     login,
@@ -27,7 +27,7 @@ function login(body) {
 
 function logout() {
     // remove user from local storage to log user out
-    localStorage.removeItem('currentUser');
+    localStorage.removeItem('accessToken');
     currentUserSubject.next(null);
 }
 
