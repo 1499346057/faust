@@ -35,13 +35,13 @@ public class TreasuryController {
     }
 
     @GetMapping("/issues")
-    @PreAuthorize("hasRole({'EMPEROR', 'TREASURY'})")
+    @PreAuthorize("hasRole('ROLE_EMPEROR') or hasRole('ROLE_TREASURY')")
     Collection<Issue> issues(@CurrentUser UserPrincipal principal) {
         return issueRepository.findAll();
     }
 
     @GetMapping("/issues/{id}")
-    @PreAuthorize("hasRole({'EMPEROR', 'TREASURY'})")
+    @PreAuthorize("hasRole('ROLE_EMPEROR') or hasRole('ROLE_TREASURY')")
     ResponseEntity<?> getIssue(@PathVariable Long id, @CurrentUser UserPrincipal principal) {
         Optional<Issue> issue = issueRepository.findById(id);
         return issue.map(response -> ok().body(response))
@@ -49,14 +49,14 @@ public class TreasuryController {
     }
 
     @DeleteMapping("/issues/{id}")
-    @PreAuthorize("hasRole({'EMPEROR', 'TREASURY'})")
+    @PreAuthorize("hasRole('ROLE_EMPEROR') or hasRole('ROLE_TREASURY')")
     ResponseEntity<?> delIssue(@PathVariable Long id) {
         issueRepository.deleteById(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/issues")
-    @PreAuthorize("hasRole({'EMPEROR', 'TREASURY'})")
+    @PreAuthorize("hasRole('ROLE_EMPEROR') or hasRole('ROLE_TREASURY')")
     ResponseEntity<Issue> createIssue(@Valid @RequestBody Issue issue) throws URISyntaxException {
         Issue result = issueRepository.save(issue);
         return ResponseEntity.created(new URI("/api/v1/treasury/issues/" + result.getId()))
@@ -64,7 +64,7 @@ public class TreasuryController {
     }
 
     @PutMapping("/issues")
-    @PreAuthorize("hasRole({'EMPEROR', 'TREASURY'})")
+    @PreAuthorize("hasRole('ROLE_EMPEROR') or hasRole('ROLE_TREASURY')")
     ResponseEntity<Issue> modifyIssue(@Valid @RequestBody Issue issue, @CurrentUser UserPrincipal principal) {
         if (issue.getState() != IssueState.New) {
             if (checkUSerForRole(principal, "Emperor"))
@@ -78,13 +78,13 @@ public class TreasuryController {
 
 
     @GetMapping("/supplies")
-    @PreAuthorize("hasRole({'TREASURY', 'SUPPLIER'})")
+    @PreAuthorize("hasRole('ROLE_TREASURY') or hasRole('ROLE_SUPPLIER')")
     Collection<Supply> GetAllSupplies(){
         return supplyRepository.findAll();
     }
 
     @GetMapping("/supplies/{id}")
-    @PreAuthorize("hasRole({'TREASURY', 'SUPPLIER'})")
+    @PreAuthorize("hasRole('ROLE_TREASURY') or hasRole('ROLE_SUPPLIER')")
     ResponseEntity<?> GetSupply(@PathVariable Long id){
         Optional<Supply> issue = supplyRepository.findById(id);
         return issue.map(response -> ok().body(response))
@@ -92,14 +92,14 @@ public class TreasuryController {
     }
 
     @DeleteMapping("/supplies/{id}")
-    @PreAuthorize("hasRole({'TREASURY', 'SUPPLIER'})")
+    @PreAuthorize("hasRole('ROLE_TREASURY') or hasRole('ROLE_SUPPLIER')")
     ResponseEntity DeleteSupply(@PathVariable Long id){
         supplyRepository.deleteById(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/supplies")
-    @PreAuthorize("hasRole({'TREASURY', 'SUPPLIER'})")
+    @PreAuthorize("hasRole('ROLE_TREASURY') or hasRole('ROLE_SUPPLIER')")
     ResponseEntity<Supply> CreateSupply(@Valid @RequestBody Supply supply, @CurrentUser UserPrincipal principal) throws URISyntaxException {
         supply.setOwner(principal.getId());
         Supply result = supplyRepository.save(supply);
@@ -108,7 +108,7 @@ public class TreasuryController {
     }
 
     @PutMapping("/supplies/{id}")
-    @PreAuthorize("hasRole({'TREASURY', 'SUPPLIER'})")
+    @PreAuthorize("hasRole('ROLE_TREASURY') or hasRole('ROLE_SUPPLIER')")
     ResponseEntity<?> UpdateSupply(@PathVariable Long id, @Valid @RequestBody Supply supply, @CurrentUser UserPrincipal principal) {
         Optional<Supply> supply1_opt = supplyRepository.findById(id);
         if (!supply1_opt.isPresent()) {

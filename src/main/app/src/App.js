@@ -93,11 +93,12 @@ class App extends Component {
                         <Switch>
                             <Route exact path="/"
                                    render={(props) => <Home isAuthenticated={this.state.isAuthenticated}
-                                                                currentUser={this.state.currentUser} handleLogout={this.handleLogout} {...props} />}>
-                            </Route>
+                                                                currentUser={this.state.currentUser} handleLogout={this.handleLogout} {...props} />} />
                             <Route path='/login' exact={true} render={(props) => <Login onLogin={this.handleLogin} {...props} />} />
-                            <Route path="/issues"
+                            <Route path="/issues" exact={true}
                                    render={(props) => <Issues isAuthenticated={this.state.isAuthenticated} currentUser={this.state.currentUser} {...props}  />}/>
+                            <Route path="/issues/:id"
+                                   render={(props) => <IssueEdit isAuthenticated={this.state.isAuthenticated} currentUser={this.state.currentUser} {...props}  />}/>
                         </Switch>
                     </div>
                 </div>

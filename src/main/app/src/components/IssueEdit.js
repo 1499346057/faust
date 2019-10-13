@@ -1,14 +1,8 @@
-import {instanceOf} from 'prop-types';
-import {Cookies, withCookies} from 'react-cookie';
-import React from 'react';
-import {withRouter} from 'react-router-dom';
+import React, { Component } from 'react';
 import {Button, Container, Form, FormGroup, Input, Label, Table} from 'reactstrap';
+import {createIssue} from "../util/APIUtils";
 
-class IssueEdit extends React.Component {
-    static propTypes = {
-        cookies: instanceOf(Cookies).isRequired
-    };
-
+class IssueEdit extends Component {
     emptyItem = {
         papers: [],
         state: "New"
@@ -16,11 +10,9 @@ class IssueEdit extends React.Component {
 
     constructor(props) {
         super(props);
-        const {cookies} = props;
         this.state = {
             item: this.emptyItem,
             paper: {},
-            csrfToken: cookies.get('XSRF-TOKEN')
         };
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -60,16 +52,7 @@ class IssueEdit extends React.Component {
         event.preventDefault();
         const {item,} = this.state;
 
-        await fetch('/api/v1/treasury/issues', {
-            method: 'POST',
-            headers: {
-                //'X-XSRF-TOKEN': this.state.csrfToken,
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(item),
-            //credentials: 'include'
-        });
+        await createIssue(item);
         this.props.history.push('/issues');
     }
 
@@ -122,4 +105,4 @@ class IssueEdit extends React.Component {
     }
 }
 
-export default withCookies(withRouter(IssueEdit));
+export default IssueEdit;

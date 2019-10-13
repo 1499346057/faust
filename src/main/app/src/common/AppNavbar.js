@@ -42,4 +42,4 @@ class AppNavbar extends Component {
     }
 }
 
-export default withCookies(AppNavbar);
+export default AppNavbar;

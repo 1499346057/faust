@@ -4,7 +4,7 @@ import { withCookies, Cookies } from 'react-cookie';
 import React, { Component } from 'react';
 import { Button, ButtonGroup, Container, Table } from 'reactstrap';
 
-import { getIssues } from '../util/APIUtils';
+import {getIssues, removeIssue} from '../util/APIUtils';
 
 
 class Issues extends Component {
@@ -15,22 +15,14 @@ class Issues extends Component {
     }
 
 
-    async componentDidMount() {
+    componentDidMount() {
         getIssues()
             .then(data => this.setState({issues: data}))
             .catch(() => this.props.history.push('/'));
     }
 
     async remove(id) {
-        await fetch(`/api/v1/treasury/issues/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'X-XSRF-TOKEN': this.state.csrfToken,
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include'
-        }).then(() => {
+        removeIssue(id).then(() => {
             let updatedIssues = [...this.state.issues].filter(i => i.id !== id);
             this.setState({issues: updatedIssues});
         });
@@ -101,4 +93,4 @@ class Issues extends Component {
     }
 }
 
-export default withCookies(withRouter(Issues));
+export default Issues;
