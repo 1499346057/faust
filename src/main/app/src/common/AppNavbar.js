@@ -24,12 +24,13 @@ class AppNavbar extends Component {
         return <Navbar color="dark" dark expand="md">
             <NavbarBrand tag={Link} to="/">Home</NavbarBrand>
             {
-                this.state.isAuthenticated ?
+                this.props.isAuthenticated ?[
                     <NavbarBrand>
                         <Button color="link" onClick={this.props.onLogout}>
-                            Logout, {this.state.currentUser.name}
+                            Logout, {this.props.currentUser.name}
                         </Button>
-                    </NavbarBrand>
+                    </NavbarBrand>,
+                    <NavbarBrand tag={Link} to="/issues">Issues</NavbarBrand>]
                     :
                     <NavbarBrand>
                         <Button color="primary" tag={Link} to="/login">

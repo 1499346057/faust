@@ -1,9 +1,13 @@
 import React, { Component } from 'react';
 import './App.css';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import {
+    Route,
+    withRouter,
+    Switch
+} from 'react-router-dom';
 import Home from './components/Home';
 import Login from "./components/Login";
-import AppNavbar from "./components/AppNavbar";
+import AppNavbar from "./common/AppNavbar";
 import Issues from "./components/Issues";
 import IssueEdit from "./components/IssueEdit";
 import Supplies from "./components/Supplies";
@@ -14,8 +18,8 @@ import { getCurrentUser } from './util/APIUtils';
 
 import {ACCESS_TOKEN} from "./constants";
 
-import Container from "reactstrap/es/Container";
 import LoadingIndicator from "./common/LoadingIndicator";
+import PrivateRoute from "./common/PrivateRoute";
 
 
 class App extends Component {
@@ -86,11 +90,15 @@ class App extends Component {
                                currentUser={this.state.currentUser}
                                onLogout={this.handleLogout} />
                     <div className="app-content">
-                        <Route exact path="/"
-                               render={(props) => <Home isAuthenticated={this.state.isAuthenticated}
-                                                            currentUser={this.state.currentUser} handleLogout={this.handleLogout} {...props} />}>
-                        </Route>
-                        <Route path='/login' exact={true} render={(props) => <Login onLogin={this.handleLogin} {...props} />} />
+                        <Switch>
+                            <Route exact path="/"
+                                   render={(props) => <Home isAuthenticated={this.state.isAuthenticated}
+                                                                currentUser={this.state.currentUser} handleLogout={this.handleLogout} {...props} />}>
+                            </Route>
+                            <Route path='/login' exact={true} render={(props) => <Login onLogin={this.handleLogin} {...props} />} />
+                            <Route path="/issues"
+                                   render={(props) => <Issues isAuthenticated={this.state.isAuthenticated} currentUser={this.state.currentUser} {...props}  />}/>
+                        </Switch>
                     </div>
                 </div>
             </div>
@@ -113,4 +121,4 @@ class App extends Component {
 {/!*</Router>*!/}
 */
 
-export default App;
+export default withRouter(App);

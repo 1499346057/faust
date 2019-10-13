@@ -36,7 +36,7 @@ public class TreasuryController {
 
     @GetMapping("/issues")
     @PreAuthorize("hasRole({'EMPEROR', 'TREASURY'})")
-    Collection<Issue> issues(Principal principal) {
+    Collection<Issue> issues(@CurrentUser UserPrincipal principal) {
         return issueRepository.findAll();
     }
 

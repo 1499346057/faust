@@ -5,9 +5,6 @@ import { Button, Container } from 'reactstrap';
 import { withCookies } from 'react-cookie';
 
 class Home extends Component {
-    state = {
-        user: null
-    };
 
     render() {
         if (!this.props.isAuthenticated) {
@@ -25,4 +22,4 @@ class Home extends Component {
     }
 }
 
-export default withCookies(Home);
+export default Home;

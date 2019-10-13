@@ -23,12 +23,9 @@ const request = (options) => {
         );
 };
 
-export function getAllPolls(page, size) {
-    page = page || 0;
-    size = size || POLL_LIST_SIZE;
-
+export function getIssues() {
     return request({
-        url: API_BASE_URL + "/polls?page=" + page + "&size=" + size,
+        url: API_BASE_URL + "/treasury/issues",
         method: 'GET'
     });
 }

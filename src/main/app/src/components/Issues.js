@@ -4,41 +4,21 @@ import { withCookies, Cookies } from 'react-cookie';
 import React, { Component } from 'react';
 import { Button, ButtonGroup, Container, Table } from 'reactstrap';
 
+import { getIssues } from '../util/APIUtils';
+
 
 class Issues extends Component {
-    static propTypes = {
-        cookies: instanceOf(Cookies).isRequired
-    };
-
     constructor(props) {
         super(props);
-        const {cookies} = props;
-        this.state = {issues: [], csrfToken: cookies.get('XSRF-TOKEN'), isLoading: true, user: null};
+        this.state = {issues: []};
         this.remove = this.remove.bind(this);
-        this.localStorageUpdated = this.localStorageUpdated.bind(this)
     }
 
 
     async componentDidMount() {
-        this.setState({isLoading: true});
-
-        fetch('api/v1/treasury/issues', {headers: { 'X-XSRF-TOKEN': this.state.csrfToken}, credentials: 'include'})
-            .then(response => response.json())
-            .then(data => this.setState({issues: data, isLoading: false}))
+        getIssues()
+            .then(data => this.setState({issues: data}))
             .catch(() => this.props.history.push('/'));
-
-        if (typeof window !== 'undefined') {
-            window.addEventListener('storage', this.localStorageUpdated)
-            this.setState({user: JSON.parse(localStorage.getItem("user"))})
-        }
-    }
-
-
-    localStorageUpdated(){
-        if (localStorage.getItem('user')) {
-            this.setState({user: JSON.parse(localStorage.getItem("user"))})
-        }
-        this.forceUpdate();
     }
 
     async remove(id) {
@@ -57,15 +37,11 @@ class Issues extends Component {
     }
 
     render() {
-        const {issues, isLoading} = this.state;
-
-        if (isLoading) {
-            return <p>Loading...</p>;
-        }
+        const {issues} = this.state;
 
         let isEmperor = false;
-        if (this.state.user) {
-            isEmperor = this.state.user.groups.indexOf("Emperor") >= 0;
+        if (this.props.currentUser.groups) {
+            isEmperor = this.props.currentUser.groups.indexOf("ROLE_EMPEROR") >= 0;
         }
 
         const issueList = issues.map(issue => {
