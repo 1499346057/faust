@@ -2,6 +2,8 @@ import React from "react";
 import {Button, Container, Form, Input, Label} from "reactstrap";
 import {login} from "../util/APIUtils";
 import {ACCESS_TOKEN} from "../constants";
+import {Spinner} from 'reactstrap';
+import {NotificationManager} from 'react-notifications';
 
 class Login extends React.Component{
 
@@ -9,7 +11,8 @@ class Login extends React.Component{
         super(props);
         this.state = {
             username: '',
-            password: ''
+            password: '',
+            isLoading: false
         };
 
         this.handleUsernameChange = this.handleUsernameChange.bind(this);
@@ -26,25 +29,22 @@ class Login extends React.Component{
     }
 
     handleSubmit() {
+        this.setState({ isLoading: true });
         const body = {
             username: this.state.username,
             password: this.state.password
         };
         login(body)
             .then(response => {
+                this.setState({ isLoading: false });
                 localStorage.setItem(ACCESS_TOKEN, response.accessToken);
                 this.props.onLogin();
             }).catch(error => {
+            this.setState({ isLoading: false });
             if(error.status === 401) {
-                // notification.error({
-                //     message: 'Polling App',
-                //     description: 'Your Username or Password is incorrect. Please try again!'
-                // });
+                NotificationManager.error('Treasury App', 'Your username or password is incorrect. Please try again!');
             } else {
-                // notification.error({
-                //     message: 'Polling App',
-                //     description: error.message || 'Sorry! Something went wrong. Please try again!'
-                // });
+                NotificationManager.error('Treasury App err', error.message || 'Sorry! Something went wrong. Please try again!');
             }
         });
     }
@@ -71,9 +71,14 @@ class Login extends React.Component{
                             onChange={this.handlePasswordChange}
                         />
                     </Label>
-                    <Button onClick={this.handleSubmit}>Submit</Button>
+                    {this.state.isLoading ?
+                        <Button onClick={this.handleSubmit}><Spinner color="dark"/></Button>
+                        :
+                        <Button onClick={this.handleSubmit}>Submit</Button>
+                    }
                 </Form>
             </Container>
+
         );
     }
 }

@@ -14,19 +14,18 @@ const request = (options) => {
 
     return fetch(options.url, options)
         .then(response => {
-                console.log(response);
-                if (response.json) {
-                    return response.json().then(json => {
-                        if (!response.ok) {
-                            return Promise.reject(json);
-                        }
-                        return json;
-                    }).catch(console.log);
+            return response.text().then(text => {
+                if (text) {
+                    var json = JSON.parse(text);
+                    if (!response.ok) {
+                        return Promise.reject(response);
+                    }
+                    return json;
+                } else {
+                    return {};
                 }
-
-                return null;
-            }
-        );
+            }).catch(console.log);
+        });
 };
 
 export function getIssues() {
@@ -41,6 +40,14 @@ export function createIssue(issue) {
         url: API_BASE_URL + "/treasury/issues",
         method: 'POST',
         body: JSON.stringify(issue)
+    });
+}
+
+export function putIssue(issue) {
+    return request({
+        url: API_BASE_URL + "/treasury/issues/" + issue.id,
+        method: 'PUT',
+        body: JSON.stringify(issue),
     });
 }
 

@@ -4,7 +4,7 @@ import { withCookies, Cookies } from 'react-cookie';
 import React, { Component } from 'react';
 import { Button, ButtonGroup, Container, Table } from 'reactstrap';
 
-import {getIssues, removeIssue} from '../util/APIUtils';
+import {getIssues, putIssue, removeIssue} from '../util/APIUtils';
 
 
 class Issues extends Component {
@@ -77,16 +77,7 @@ class Issues extends Component {
 
     async handleApprove(issue) {
         issue.state = "Approved";
-        await fetch(`/api/v1/treasury/issues/`, {
-            method: 'PUT',
-            headers: {
-                'X-XSRF-TOKEN': this.state.csrfToken,
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include',
-            body: JSON.stringify(issue),
-        }).then(() => {
+        putIssue(issue).then(() => {
             let updatedIssues = [...this.state.issues].map(i => (i.id === issue.id) ? (i.status = "Approved", i) : (i));
             this.setState({issues: updatedIssues});
         });

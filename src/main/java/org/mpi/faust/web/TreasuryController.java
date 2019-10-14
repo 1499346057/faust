@@ -63,9 +63,9 @@ public class TreasuryController {
                 .body(result);
     }
 
-    @PutMapping("/issues")
+    @PutMapping("/issues/{id}")
     @PreAuthorize("hasRole('ROLE_EMPEROR') or hasRole('ROLE_TREASURY')")
-    ResponseEntity<Issue> modifyIssue(@Valid @RequestBody Issue issue, @CurrentUser UserPrincipal principal) {
+    ResponseEntity<Issue> modifyIssue(@PathVariable Long id, @Valid @RequestBody Issue issue, @CurrentUser UserPrincipal principal) {
         if (issue.getState() != IssueState.New) {
             if (checkUSerForRole(principal, "Emperor"))
             {

@@ -13,6 +13,10 @@ import IssueEdit from "./components/IssueEdit";
 import Supplies from "./components/Supplies";
 import SupplyEdit from "./components/SupplyEdit";
 
+import {NotificationContainer, NotificationManager} from 'react-notifications';
+
+import 'react-notifications/lib/notifications.css';
+
 
 import { getCurrentUser } from './util/APIUtils';
 
@@ -20,6 +24,7 @@ import {ACCESS_TOKEN} from "./constants";
 
 import LoadingIndicator from "./common/LoadingIndicator";
 import PrivateRoute from "./common/PrivateRoute";
+import {Container} from "reactstrap";
 
 
 class App extends Component {
@@ -102,6 +107,8 @@ class App extends Component {
                         </Switch>
                     </div>
                 </div>
+
+                <NotificationContainer/>
             </div>
     )
   }
