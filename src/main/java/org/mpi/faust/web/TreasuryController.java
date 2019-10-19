@@ -56,7 +56,7 @@ public class TreasuryController {
     }
 
     @PostMapping("/issues")
-    @PreAuthorize("hasRole('ROLE_EMPEROR') or hasRole('ROLE_TREASURY')")
+    @PreAuthorize("hasRole('ROLE_TREASURY')")
     ResponseEntity<Issue> createIssue(@Valid @RequestBody Issue issue) throws URISyntaxException {
         Issue result = issueRepository.save(issue);
         return ResponseEntity.created(new URI("/api/v1/treasury/issues/" + result.getId()))
@@ -67,7 +67,7 @@ public class TreasuryController {
     @PreAuthorize("hasRole('ROLE_EMPEROR') or hasRole('ROLE_TREASURY')")
     ResponseEntity<Issue> modifyIssue(@PathVariable Long id, @Valid @RequestBody Issue issue, @CurrentUser UserPrincipal principal) {
         if (issue.getState() != IssueState.New) {
-            if (checkUSerForRole(principal, "Emperor"))
+            if (checkUSerForRole(principal, "ROLE_EMPEROR"))
             {
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
@@ -99,9 +99,10 @@ public class TreasuryController {
     }
 
     @PostMapping("/supplies")
-    @PreAuthorize("hasRole('ROLE_TREASURY') or hasRole('ROLE_SUPPLIER')")
+    @PreAuthorize("hasRole('ROLE_SUPPLIER')")
     ResponseEntity<Supply> CreateSupply(@Valid @RequestBody Supply supply, @CurrentUser UserPrincipal principal) throws URISyntaxException {
         supply.setOwner(principal.getId());
+        supply.setStatus("New");
         Supply result = supplyRepository.save(supply);
         return ResponseEntity.created(new URI("/api/v1/treasury/supplies/" + result.getId()))
                 .body(result);
@@ -115,12 +116,12 @@ public class TreasuryController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         Supply supply1 = supply1_opt.get();
-        if(checkUSerForRole(principal, "Treasury")) {
+        if(checkUSerForRole(principal, "ROLE_TREASURY")) {
             supply1.setStatus("Approved");
             supplyRepository.saveAndFlush(supply1);
             return ok(supply1);
         }
-        else if(checkUSerForRole(principal, "Supplier")) {
+        else if(checkUSerForRole(principal, "ROLE_SUPPLIER")) {
             supply1.setItems(supply.getItems());
             supply1.setStatus(supply.getStatus());
             supplyRepository.saveAndFlush(supply1);

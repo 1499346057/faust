@@ -30,7 +30,7 @@ class AppNavbar extends Component {
             if (isTreasury || isEmperor) {
                 list.push(<NavbarBrand tag={Link} to="/issues">Issues</NavbarBrand>);
             }
-            if (isTreasury) {
+            if (isTreasury || isSupplier) {
                 list.push(<NavbarBrand tag={Link} to="/supplies">Supplies</NavbarBrand>);
             }
         }

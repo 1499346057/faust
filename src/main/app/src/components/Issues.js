@@ -54,9 +54,12 @@ class Issues extends Component {
         return (
             <div>
                 <Container fluid>
-                    <div className="float-right">
-                        <Button color="success" tag={Link} to="/issues/new">Add Issue</Button>
-                    </div>
+                    { !isEmperor?
+                        <div className="float-right">
+                            <Button color="success" tag={Link} to="/issues/new">Add Issue</Button>
+                        </div>
+                        :''
+                    }
                     <h3>Issue management</h3>
                     <Table className="mt-4">
                         <thead>

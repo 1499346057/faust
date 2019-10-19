@@ -5,7 +5,7 @@ import {NotificationManager} from "react-notifications";
 
 class SupplyEdit extends Component {
     emptyItem = {
-        positions: [],
+        items: [],
         state: "New"
     };
 
@@ -32,10 +32,10 @@ class SupplyEdit extends Component {
 
     handleAdd(event) {
         const position = this.state.position;
-        const positions = this.state.item.positions;
-        positions.push(position);
+        const items = this.state.item.items;
+        items.push(position);
         const item = this.state.item;
-        item.positions = positions;
+        item.items = items;
         this.setState(item);
     }
 
@@ -59,7 +59,7 @@ class SupplyEdit extends Component {
     render() {
         const position = this.state.position;
         const item = this.state.item;
-        const positionList = item.positions ? item.positions.map(position => {
+        const positionList = item.items ? item.items.map(position => {
             // key={position.id}
             return <tr key={position.id}>
                 <td>{position.good}</td>

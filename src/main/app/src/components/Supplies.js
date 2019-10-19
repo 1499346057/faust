@@ -18,7 +18,7 @@ class Supplies extends Component {
     componentDidMount() {
         getSupplies()
             .then(data => {
-                this.setState({issues: data});
+                this.setState({supplies: data});
             })
             .catch(error => {
                 redirectHandler.call(this, error);
@@ -27,8 +27,8 @@ class Supplies extends Component {
 
     async remove(id) {
         removeSupply(id).then(() => {
-            let updatedSupplies = [...this.state.issues].filter(i => i.id !== id);
-            this.setState({issues: updatedSupplies});
+            let updatedSupplies = [...this.state.supplies].filter(i => i.id !== id);
+            this.setState({supplies: updatedSupplies});
         });
     }
 
@@ -45,10 +45,10 @@ class Supplies extends Component {
                 <td>{supply.items.map(item => {
                     return <div>{item.good} ; {item.price}</div>
                 })}</td>
-                <td>{supply.state}</td>
+                <td>{supply.status}</td>
                 <td>
                     <ButtonGroup>
-                        {isTreasury && supply.state === "New" ?<Button size="sm" color="success" onClick={() => this.handleApprove(supply)}>Approve</Button>:""}
+                        {isTreasury && supply.status === "New" ?<Button size="sm" color="success" onClick={() => this.handleApprove(supply)}>Approve</Button>:""}
                         <Button size="sm" color="danger" onClick={() => this.remove(supply.id)}>Delete</Button>
                     </ButtonGroup>
                 </td>
@@ -59,7 +59,9 @@ class Supplies extends Component {
             <div>
                 <Container fluid>
                     <div className="float-right">
-                        <Button color="success" tag={Link} to="/supply/new">Add Supply</Button>
+                        {!isTreasury?
+                            <Button color="success" tag={Link} to="/supplies/new">Add Supply</Button>:''
+                        }
                     </div>
                     <h3>Supply management</h3>
                     <Table className="mt-4">

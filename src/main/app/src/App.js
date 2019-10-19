@@ -52,10 +52,10 @@ class App extends Component {
                     isLoading: false
                 });
             }).catch(error => {
-            this.setState({
-                isLoading: false
+                this.setState({
+                    isLoading: false,
+                });
             });
-        });
     }
 
     componentDidMount() {
@@ -70,8 +70,6 @@ class App extends Component {
             currentUser: null,
             isAuthenticated: false
         });
-
-        this.props.history.push(redirectTo);
     }
 
     /*
@@ -86,7 +84,13 @@ class App extends Component {
 
   render() {
       if(this.state.isLoading) {
-          return <LoadingIndicator />
+          return (
+              <div>
+                  <div className="app-container">
+              <LoadingIndicator />
+                  </div>
+              </div>
+          );
       }
     return (
             <div>
@@ -96,18 +100,12 @@ class App extends Component {
                                onLogout={this.handleLogout} />
                     <div className="app-content">
                         <Switch>
-                            <Route exact path="/"
-                                   render={(props) => <Home isAuthenticated={this.state.isAuthenticated}
-                                                                currentUser={this.state.currentUser} handleLogout={this.handleLogout} {...props} />} />
-                            <Route path='/login' exact={true} render={(props) => <Login onLogin={this.handleLogin} {...props} />} />
-                            <Route path="/issues" exact={true}
-                                   render={(props) => <Issues isAuthenticated={this.state.isAuthenticated} currentUser={this.state.currentUser} {...props}  />}/>
-                            <Route path="/issues/:id"
-                                   render={(props) => <IssueEdit isAuthenticated={this.state.isAuthenticated} currentUser={this.state.currentUser} {...props}  />}/>
-                            <Route path="/supplies" exact={true}
-                                   render={(props) => <Supplies isAuthenticated={this.state.isAuthenticated} currentUser={this.state.currentUser} {...props}  />}/>
-                            <Route path="/supplies/:id"
-                                   render={(props) => <SupplyEdit isAuthenticated={this.state.isAuthenticated} currentUser={this.state.currentUser} {...props}  />}/>
+                            <Route exact path="/" render={(props) => <Home isAuthenticated={this.state.isAuthenticated} currentUser={this.state.currentUser} handleLogout={this.handleLogout} {...props} />} />
+                        <Route path='/login' exact={true} render={(props) => <Login onLogin={this.handleLogin} {...props} />} />
+                            <PrivateRoute component={Issues}  isAuthenticated={this.state.isAuthenticated}  path="/issues" exact={true} currentUser={this.state.currentUser}/>
+                            <PrivateRoute component={IssueEdit} isAuthenticated={this.state.isAuthenticated}  path="/issues/:id" currentUser={this.state.currentUser} />
+                            <PrivateRoute component={Supplies} isAuthenticated={this.state.isAuthenticated}  path="/supplies" exact={true} currentUser={this.state.currentUser}/>
+                            <PrivateRoute component={SupplyEdit} isAuthenticated={this.state.isAuthenticated}  path="/supplies/:id" currentUser={this.state.currentUser}/>
                         </Switch>
                     </div>
                 </div>
