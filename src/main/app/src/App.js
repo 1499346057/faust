@@ -34,7 +34,7 @@ class App extends Component {
             currentUser: null,
             isAuthenticated: false,
             isLoading: true
-        }
+        };
         this.handleLogout = this.handleLogout.bind(this);
         this.loadCurrentUser = this.loadCurrentUser.bind(this);
         this.handleLogin = this.handleLogin.bind(this);
@@ -104,6 +104,10 @@ class App extends Component {
                                    render={(props) => <Issues isAuthenticated={this.state.isAuthenticated} currentUser={this.state.currentUser} {...props}  />}/>
                             <Route path="/issues/:id"
                                    render={(props) => <IssueEdit isAuthenticated={this.state.isAuthenticated} currentUser={this.state.currentUser} {...props}  />}/>
+                            <Route path="/supplies" exact={true}
+                                   render={(props) => <Supplies isAuthenticated={this.state.isAuthenticated} currentUser={this.state.currentUser} {...props}  />}/>
+                            <Route path="/supplies/:id"
+                                   render={(props) => <SupplyEdit isAuthenticated={this.state.isAuthenticated} currentUser={this.state.currentUser} {...props}  />}/>
                         </Switch>
                     </div>
                 </div>

@@ -1,71 +1,43 @@
-import { Link, withRouter } from 'react-router-dom';
-import { instanceOf } from 'prop-types';
-import { withCookies, Cookies } from 'react-cookie';
+import { Link } from 'react-router-dom';
 import React, { Component } from 'react';
 import { Button, ButtonGroup, Container, Table } from 'reactstrap';
 
+import {getSupplies, putSupply, removeSupply, redirectHandler} from '../util/APIUtils';
 
-class Supplys extends Component {
-    static propTypes = {
-        cookies: instanceOf(Cookies).isRequired
-    };
 
+
+
+class Supplies extends Component {
     constructor(props) {
         super(props);
-        const {cookies} = props;
-        this.state = {supplies: [], csrfToken: cookies.get('XSRF-TOKEN'), isLoading: true, user: null};
+        this.state = {supplies: []};
         this.remove = this.remove.bind(this);
-        this.localStorageUpdated = this.localStorageUpdated.bind(this)
     }
 
 
-    async componentDidMount() {
-        this.setState({isLoading: true});
-
-        fetch('api/v1/treasury/supplies', {headers: { 'X-XSRF-TOKEN': this.state.csrfToken}, credentials: 'include'})
-            .then(response => response.json())
-            .then(data => this.setState({supplies: data, isLoading: false}))
-            .catch(() => this.props.history.push('/'));
-
-        if (typeof window !== 'undefined') {
-            window.addEventListener('storage', this.localStorageUpdated)
-            this.setState({user: JSON.parse(localStorage.getItem("user"))})
-        }
-    }
-
-
-    localStorageUpdated(){
-        if (localStorage.getItem('user')) {
-            this.setState({user: JSON.parse(localStorage.getItem("user"))})
-        }
-        this.forceUpdate();
+    componentDidMount() {
+        getSupplies()
+            .then(data => {
+                this.setState({issues: data});
+            })
+            .catch(error => {
+                redirectHandler.call(this, error);
+            });
     }
 
     async remove(id) {
-        await fetch(`/api/v1/treasury/supplies/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'X-XSRF-TOKEN': this.state.csrfToken,
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include'
-        }).then(() => {
-            let updatedSupplys = [...this.state.supplies].filter(i => i.id !== id);
-            this.setState({supplies: updatedSupplys});
+        removeSupply(id).then(() => {
+            let updatedSupplies = [...this.state.issues].filter(i => i.id !== id);
+            this.setState({issues: updatedSupplies});
         });
     }
 
     render() {
-        const {supplies, isLoading} = this.state;
+        const {supplies} = this.state;
 
-        if (isLoading) {
-            return <p>Loading...</p>;
-        }
-
-        var isTreasurer = false;
-        if (this.state.user) {
-            isTreasurer = this.state.user.groups.indexOf("Treasury") >= 0;
+        let isTreasury = false;
+        if (this.props.currentUser.groups) {
+            isTreasury = this.props.currentUser.groups.indexOf("ROLE_TREASURY") >= 0;
         }
 
         const supplyList = supplies.map(supply => {
@@ -73,10 +45,10 @@ class Supplys extends Component {
                 <td>{supply.items.map(item => {
                     return <div>{item.good} ; {item.price}</div>
                 })}</td>
-                <td>{supply.status}</td>
+                <td>{supply.state}</td>
                 <td>
                     <ButtonGroup>
-                        {isTreasurer && supply.status === "New" ?<Button size="sm" color="success" onClick={() => this.handleApprove(supply)}>Approve</Button>:""}
+                        {isTreasury && supply.state === "New" ?<Button size="sm" color="success" onClick={() => this.handleApprove(supply)}>Approve</Button>:""}
                         <Button size="sm" color="danger" onClick={() => this.remove(supply.id)}>Delete</Button>
                     </ButtonGroup>
                 </td>
@@ -87,14 +59,14 @@ class Supplys extends Component {
             <div>
                 <Container fluid>
                     <div className="float-right">
-                        <Button color="success" tag={Link} to="/supplies/new">Add Supply</Button>
+                        <Button color="success" tag={Link} to="/supply/new">Add Supply</Button>
                     </div>
-                    <h3>Supply management management</h3>
+                    <h3>Supply management</h3>
                     <Table className="mt-4">
                         <thead>
                         <tr>
-                            <th width="20%">items</th>
-                            <th width="20%">status</th>
+                            <th width="20%">value</th>
+                            <th width="20%">state</th>
                             <th width="20%">actions</th>
                         </tr>
                         </thead>
@@ -107,22 +79,13 @@ class Supplys extends Component {
         );
     }
 
-    async handleApprove(supply) {
-        supply.state = "Approved";
-        await fetch(`/api/v1/treasury/supplies/`+supply.id, {
-            method: 'PUT',
-            headers: {
-                'X-XSRF-TOKEN': this.state.csrfToken,
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include',
-            body: JSON.stringify(supply),
-        }).then(() => {
-            let updatedSupplys = [...this.state.supplies].map(i => (i.id === supply.id) ? (i.status = "Approved", i) : (i));
-            this.setState({supplies: updatedSupplys});
+    async handleApprove(issue) {
+        issue.state = "Approved";
+        putSupply(issue).then(() => {
+            let updatedSupplies = [...this.state.supplies].map(i => (i.id === issue.id) ? (i.status = "Approved", i) : (i));
+            this.setState({supplies: updatedSupplies});
         });
     }
 }
 
-export default withCookies(withRouter(Supplys));
+export default Supplies;

@@ -1,4 +1,5 @@
 import {API_BASE_URL, POLL_LIST_SIZE, ACCESS_TOKEN} from '../constants';
+import {NotificationManager} from "react-notifications";
 
 const request = (options) => {
     const headers = new Headers({
@@ -14,17 +15,25 @@ const request = (options) => {
 
     return fetch(options.url, options)
         .then(response => {
+            if (!response.ok) {
+                return Promise.reject(response);
+            }
+
             return response.text().then(text => {
                 if (text) {
-                    var json = JSON.parse(text);
-                    if (!response.ok) {
-                        return Promise.reject(response);
-                    }
+                    let json = JSON.parse(text);
                     return json;
                 } else {
                     return {};
                 }
-            }).catch(console.log);
+            }).catch((error) => {
+                console.log('json parse error', error);
+                return Promise.reject(error);
+            });
+        })
+        .catch((error) => {
+            console.log('global fetch error', error);
+            return Promise.reject(error);
         });
 };
 
@@ -67,6 +76,45 @@ export function removeIssue(id) {
     });
 }
 
+export function getSupplies() {
+    return request({
+        url: API_BASE_URL + "/treasury/supplies",
+        method: 'GET'
+    });
+}
+
+export function createSupply(issue) {
+    return request({
+        url: API_BASE_URL + "/treasury/supplies",
+        method: 'POST',
+        body: JSON.stringify(issue)
+    });
+}
+
+export function putSupply(issue) {
+    return request({
+        url: API_BASE_URL + "/treasury/supplies/" + issue.id,
+        method: 'PUT',
+        body: JSON.stringify(issue),
+    });
+}
+
+
+export function getSupply(id) {
+    return request({
+        url: API_BASE_URL + "/treasury/supplies/" + id,
+        method: 'GET',
+        body: JSON.stringify(id),
+    });
+}
+
+export function removeSupply(id) {
+    return request({
+        url: API_BASE_URL + "/treasury/supplies/" + id,
+        method: 'DELETE'
+    });
+}
+
 export function login(loginRequest) {
     return request({
         url: API_BASE_URL + "/auth/signin",
@@ -84,4 +132,13 @@ export function getCurrentUser() {
         url: API_BASE_URL + "/user/me",
         method: 'GET'
     });
+}
+
+export function redirectHandler(error) {
+    if (error.status === 403) {
+        NotificationManager.error('Treasury App', 'Permission denied.');
+    } else {
+        NotificationManager.error('Treasury App err', error.message || 'Sorry! Something went wrong. Please try again!');
+    }
+    this.props.history.push('/');
 }

@@ -1,49 +1,41 @@
-import {instanceOf} from 'prop-types';
-import {Cookies, withCookies} from 'react-cookie';
-import React, {Component} from 'react';
-import {withRouter} from 'react-router-dom';
+import React, { Component } from 'react';
 import {Button, Container, Form, FormGroup, Input, Label, Table} from 'reactstrap';
+import {createSupply, getSupplies} from "../util/APIUtils";
+import {NotificationManager} from "react-notifications";
 
-class IssueEdit extends Component {
-    static propTypes = {
-        cookies: instanceOf(Cookies).isRequired
-    };
-
+class SupplyEdit extends Component {
     emptyItem = {
-        items: [],
-        status: "New"
+        positions: [],
+        state: "New"
     };
 
     constructor(props) {
         super(props);
-        const {cookies} = props;
         this.state = {
             item: this.emptyItem,
-            supply: {},
-            csrfToken: cookies.get('XSRF-TOKEN')
+            position: {},
         };
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleAdd = this.handleAdd.bind(this);
     }
 
-    async componentDidMount() {
+    componentDidMount() {
         if (this.props.match.params.id !== 'new') {
-            try {
-                const supply = await (await fetch(`/api/v1/treasury/supplies/${this.props.match.params.id}`, {credentials: 'include'})).json();
+            getSupplies(this.props.match.params.id).then(supply => {
                 this.setState({item: supply});
-            } catch (error) {
+            }).catch(() => {
                 this.props.history.push('/');
-            }
+            });
         }
     }
 
     handleAdd(event) {
-        var supply = this.state.supply;
-        var supplies = this.state.item.items;
-        supplies.push(supply);
-        var item = this.state.item;
-        item.items = supplies;
+        const position = this.state.position;
+        const positions = this.state.item.positions;
+        positions.push(position);
+        const item = this.state.item;
+        item.positions = positions;
         this.setState(item);
     }
 
@@ -51,36 +43,27 @@ class IssueEdit extends Component {
         const target = event.target;
         const value = target.value;
         const name = target.name;
-        let supply = {...this.state.supply};
-        supply[name] = value;
-        this.setState({supply});
+        let position = {...this.state.position};
+        position[name] = value;
+        this.setState({position});
     }
 
     async handleSubmit(event) {
         event.preventDefault();
         const {item,} = this.state;
 
-        await fetch('/api/v1/treasury/supplies', {
-            method: 'POST',
-            headers: {
-                'X-XSRF-TOKEN': this.state.csrfToken,   // ???
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(item),
-            credentials: 'include'
-        });
+        await createSupply(item);
         this.props.history.push('/supplies');
     }
 
     render() {
-        const supply = this.state.supply;
+        const position = this.state.position;
         const item = this.state.item;
-        const supplyList = item.items ? item.items.map(supplyItem => {
-            // key={supply.id}
-            return <tr key={supplyItem.id}>
-                <td>{supplyItem.good}</td>
-                <td>{supplyItem.price}</td>
+        const positionList = item.positions ? item.positions.map(position => {
+            // key={position.id}
+            return <tr key={position.id}>
+                <td>{position.good}</td>
+                <td>{position.price}</td>
             </tr>
         }) : "";
         const title = <h2>{item.id ? 'Edit supply' : 'Add supply'}</h2>;
@@ -91,14 +74,14 @@ class IssueEdit extends Component {
                 <Form>
                     <div className="row">
                         <FormGroup className="col-md-4 mb-3">
-                            <Label for="good">Good</Label>
-                            <Input type="text" name="good" id="good" value={supply.good || ''}
+                            <Label for="value">Good</Label>
+                            <Input type="text" name="good" id="good" value={position.good || ''}
                                    onChange={this.handleChange} autoComplete="name"/>
                         </FormGroup>
                         <FormGroup className="col-md-4 mb-3">
-                            <Label for="price">price</Label>
-                            <Input type="text" name="price" id="price" value={supply.price || ''}
-                                   onChange={this.handleChange} autoComplete="address-level1"/>
+                            <Label for="value">Price</Label>
+                            <Input type="text" type="number" name="price" id="price" value={position.price || ''}
+                                   onChange={this.handleChange} type="number" autoComplete="address-level1"/>
                         </FormGroup>
                         <FormGroup className="col-md-4 mb-3">
                             <Button color="primary" onClick={this.handleAdd}>Add</Button>{' '}
@@ -113,7 +96,7 @@ class IssueEdit extends Component {
                     </tr>
                     </thead>
                     <tbody>
-                    {supplyList}
+                    {positionList}
                     </tbody>
                 </Table>
                 <Button color="primary" onClick={this.handleSubmit}>Commit</Button>{' '}
@@ -122,4 +105,4 @@ class IssueEdit extends Component {
     }
 }
 
-export default withCookies(withRouter(IssueEdit));
+export default SupplyEdit;

@@ -1,10 +1,8 @@
-import { Link, withRouter } from 'react-router-dom';
-import { instanceOf } from 'prop-types';
-import { withCookies, Cookies } from 'react-cookie';
+import { Link } from 'react-router-dom';
 import React, { Component } from 'react';
 import { Button, ButtonGroup, Container, Table } from 'reactstrap';
 
-import {getIssues, putIssue, removeIssue} from '../util/APIUtils';
+import {getIssues, putIssue, removeIssue, redirectHandler} from '../util/APIUtils';
 
 
 class Issues extends Component {
@@ -18,7 +16,9 @@ class Issues extends Component {
     componentDidMount() {
         getIssues()
             .then(data => this.setState({issues: data}))
-            .catch(() => this.props.history.push('/'));
+            .catch(error => {
+                redirectHandler.call(this, error);
+            });
     }
 
     async remove(id) {
