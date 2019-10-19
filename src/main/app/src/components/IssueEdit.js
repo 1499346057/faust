@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import {Button, Container, Form, FormGroup, Input, Label, Table} from 'reactstrap';
-import {createIssue} from "../util/APIUtils";
+import {createIssue, getIssue} from "../util/APIUtils";
+import {NotificationManager} from "react-notifications";
 
 class IssueEdit extends Component {
     emptyItem = {
@@ -19,14 +20,13 @@ class IssueEdit extends Component {
         this.handleAdd = this.handleAdd.bind(this);
     }
 
-    async componentDidMount() {
+    componentDidMount() {
         if (this.props.match.params.id !== 'new') {
-            try {
-                const issue = await (await fetch(`/api/v1/treasury/issues/${this.props.match.params.id}`, {credentials: 'include'})).json();
+            getIssue(this.props.match.params.id).then(issue => {
                 this.setState({item: issue});
-            } catch (error) {
+            }).catch(() => {
                 this.props.history.push('/');
-            }
+            });
         }
     }
 
@@ -75,12 +75,12 @@ class IssueEdit extends Component {
                     <div className="row">
                         <FormGroup className="col-md-4 mb-3">
                             <Label for="value">Amount</Label>
-                            <Input type="text" name="amount" id="amount" value={paper.amount || ''}
+                            <Input type="text" type="number" name="amount" id="amount" value={paper.amount || ''}
                                    onChange={this.handleChange} autoComplete="name"/>
                         </FormGroup>
                         <FormGroup className="col-md-4 mb-3">
                             <Label for="value">Value</Label>
-                            <Input type="text" name="value" id="value" value={paper.value || ''}
+                            <Input type="text" type="number" name="value" id="value" value={paper.value || ''}
                                    onChange={this.handleChange} autoComplete="address-level1"/>
                         </FormGroup>
                         <FormGroup className="col-md-4 mb-3">

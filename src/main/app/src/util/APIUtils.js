@@ -51,6 +51,15 @@ export function putIssue(issue) {
     });
 }
 
+
+export function getIssue(id) {
+    return request({
+        url: API_BASE_URL + "/treasury/issues/" + id,
+        method: 'GET',
+        body: JSON.stringify(id),
+    });
+}
+
 export function removeIssue(id) {
     return request({
         url: API_BASE_URL + "/treasury/issues/" + id,
