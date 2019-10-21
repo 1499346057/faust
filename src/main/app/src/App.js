@@ -12,6 +12,7 @@ import Issues from "./components/Issues";
 import IssueEdit from "./components/IssueEdit";
 import Supplies from "./components/Supplies";
 import SupplyEdit from "./components/SupplyEdit";
+import Profile from "./components/Profile"
 
 import {NotificationContainer, NotificationManager} from 'react-notifications';
 
@@ -25,6 +26,7 @@ import {ACCESS_TOKEN} from "./constants";
 import LoadingIndicator from "./common/LoadingIndicator";
 import PrivateRoute from "./common/PrivateRoute";
 import {Container} from "reactstrap";
+import Footer from "./common/Footer";
 
 
 class App extends Component {
@@ -106,8 +108,10 @@ class App extends Component {
                             <PrivateRoute component={IssueEdit} isAuthenticated={this.state.isAuthenticated}  path="/issues/:id" currentUser={this.state.currentUser} />
                             <PrivateRoute component={Supplies} isAuthenticated={this.state.isAuthenticated}  path="/supplies" exact={true} currentUser={this.state.currentUser}/>
                             <PrivateRoute component={SupplyEdit} isAuthenticated={this.state.isAuthenticated}  path="/supplies/:id" currentUser={this.state.currentUser}/>
+                            <PrivateRoute component={Profile} isAuthenticated={this.state.isAuthenticated}  path="/profile" exact={true} currentUser={this.state.currentUser}/>
                         </Switch>
                     </div>
+                    <Footer />
                 </div>
 
                 <NotificationContainer/>

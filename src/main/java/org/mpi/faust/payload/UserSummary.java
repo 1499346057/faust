@@ -1,5 +1,6 @@
 package org.mpi.faust.payload;
 
+import java.math.BigInteger;
 import java.util.List;
 
 public class UserSummary {
@@ -8,11 +9,14 @@ public class UserSummary {
     private String name;
     private List<String> groups;
 
-    public UserSummary(Long id, String username, String name, List<String> groups) {
+    private long money;
+
+    public UserSummary(Long id, String username, String name, List<String> groups, long money) {
         this.id = id;
         this.username = username;
         this.name = name;
         this.groups = groups;
+        this.money = money;
     }
 
     public Long getId() {
@@ -44,4 +48,12 @@ public class UserSummary {
     }
 
     public List<String> getGroups() { return this.groups; }
+
+    public long getMoney() {
+        return money;
+    }
+
+    public void setMoney(long money) {
+        this.money = money;
+    }
 }

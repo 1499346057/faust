@@ -1,5 +1,5 @@
 import React from "react";
-import {Button, Container, Form, Input, Label} from "reactstrap";
+import {Button, Col, Container, Form, FormGroup, Input, Label} from "reactstrap";
 import {login} from "../util/APIUtils";
 import {ACCESS_TOKEN} from "../constants";
 import {Spinner} from 'reactstrap';
@@ -51,34 +51,35 @@ class Login extends React.Component{
 
     render() {
         return (
-            <Container>
-                <Form onSubmit={this.handleSubmit}>
-                    <Label>
-                        Login
-                        <Input
-                            type="text"
-                            placeholder="login"
-                            value={this.state.username}
-                            onChange={this.handleUsernameChange}
-                        />
-                    </Label>
-                    <Label>
-                        Password
-                        <Input
-                            type="password"
-                            placeholder="password"
-                            value={this.state.password}
-                            onChange={this.handlePasswordChange}
-                        />
-                    </Label>
-                    {this.state.isLoading ?
-                        <Button onClick={this.handleSubmit}><Spinner color="dark"/></Button>
-                        :
-                        <Button onClick={this.handleSubmit}>Submit</Button>
-                    }
-                </Form>
-            </Container>
-
+            <Container className="App">
+                <h2>Sign In</h2>
+                <Form className="form">
+                    <Col>
+                        <FormGroup>
+                            <Label>Login</Label>
+                            <Input
+                                type="text"
+                                placeholder="login"
+                                value={this.state.username}
+                                onChange={this.handleUsernameChange}
+                            />
+                        </FormGroup>
+                    </Col>
+                    <Col>
+                        <FormGroup>
+                            <Label for="examplePassword">Password</Label>
+                            <Input
+                                type="password"
+                                name="password"
+                                placeholder="********"
+                                value={this.state.password}
+                                onChange={this.handlePasswordChange}
+                            />
+                        </FormGroup>
+                    </Col>
+                    <Button onClick={this.handleSubmit}>Submit</Button>
+            </Form>
+        </Container>
         );
     }
 }

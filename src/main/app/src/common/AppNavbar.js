@@ -43,6 +43,7 @@ class AppNavbar extends Component {
                             Logout, {this.props.currentUser.name}
                         </Button>
                     </NavbarBrand>,
+                    <NavbarBrand tag={Link} to="/profile">Profile</NavbarBrand>,
                     list]
                     :
                     <NavbarBrand>

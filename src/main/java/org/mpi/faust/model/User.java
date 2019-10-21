@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,6 +22,7 @@ public class User {
     @Column(unique=true)
     private String username;
     private String email;
+    private long money;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_authority",

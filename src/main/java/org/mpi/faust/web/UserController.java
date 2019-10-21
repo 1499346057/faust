@@ -29,7 +29,7 @@ public class UserController {
     public UserSummary getCurrentUser(@CurrentUser UserPrincipal currentUser) {
         List<String> groups = new ArrayList<>();
         currentUser.getAuthorities().forEach(authority -> groups.add(((SimpleGrantedAuthority)authority).getAuthority()));
-        UserSummary userSummary = new UserSummary(currentUser.getId(), currentUser.getUsername(), currentUser.getName(), groups);
+        UserSummary userSummary = new UserSummary(currentUser.getId(), currentUser.getUsername(), currentUser.getName(), groups, currentUser.getMoney());
         return userSummary;
     }
 }

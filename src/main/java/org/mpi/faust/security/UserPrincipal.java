@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -26,13 +27,16 @@ public class UserPrincipal implements UserDetails {
 
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UserPrincipal(Long id, String name, String username, String email, String password, Collection<? extends GrantedAuthority> authorities) {
+    private long money;
+
+    public UserPrincipal(Long id, String name, String username, String email, String password, Collection<? extends GrantedAuthority> authorities, long money) {
         this.id = id;
         this.name = name;
         this.username = username;
         this.email = email;
         this.password = password;
         this.authorities = authorities;
+        this.money = money;
     }
 
     public static UserPrincipal create(User user) {
@@ -46,7 +50,8 @@ public class UserPrincipal implements UserDetails {
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
-                authorities
+                authorities,
+                user.getMoney()
         );
     }
 
@@ -109,5 +114,9 @@ public class UserPrincipal implements UserDetails {
     public int hashCode() {
 
         return Objects.hash(id);
+    }
+
+    public long getMoney() {
+        return money;
     }
 }
