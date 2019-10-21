@@ -67,7 +67,7 @@ public class TreasuryController {
     @PreAuthorize("hasRole('ROLE_EMPEROR') or hasRole('ROLE_TREASURY')")
     ResponseEntity<Issue> modifyIssue(@PathVariable Long id, @Valid @RequestBody Issue issue, @CurrentUser UserPrincipal principal) {
         if (issue.getState() != IssueState.New) {
-            if (checkUSerForRole(principal, "ROLE_EMPEROR"))
+            if (!checkUSerForRole(principal, "ROLE_EMPEROR"))
             {
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
