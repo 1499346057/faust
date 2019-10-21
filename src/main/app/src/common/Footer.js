@@ -7,7 +7,7 @@ class Footer extends React.Component {
             <footer>
                 <hr/>
                 <Container>
-                    Team #6
+                    Team #6. The Central Bank of Faust universe
                 </Container>
             </footer>
         )

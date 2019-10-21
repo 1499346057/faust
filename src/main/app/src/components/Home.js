@@ -9,14 +9,16 @@ class Home extends Component {
     render() {
         if (!this.props.isAuthenticated) {
             return (
-                <div>
-                    <Button color="primary" tag={Link} to="/login">Login</Button>
-                </div>
+                <Container fluid>
+                    Please, authorize to proceed.
+                </Container>
             );
         }
         return (
             <div>
-                Hello, {this.props.currentUser.name}, {this.props.currentUser.groups.toString()}
+                <Container fluid>
+                    Hello, {this.props.currentUser.name}, {this.props.currentUser.groups.toString()}
+                </Container>
             </div>
         )
     }
