@@ -35,16 +35,18 @@ class Issues extends Component {
         if (this.props.currentUser.groups) {
             isEmperor = this.props.currentUser.groups.indexOf("ROLE_EMPEROR") >= 0;
         }
+        let isTreasury = this.props.currentUser.groups.indexOf("ROLE_TREASURY") >= 0;
 
         const issueList = issues.map(issue => {
             return <tr key={issue.id}>
                 <td>{issue.papers.map(paper => {
-                    return <div>{paper.amount} ; {paper.value}</div>
+                    return <div>{paper.amount} ({paper.total}) ; {paper.value}</div>
                 })}</td>
                 <td>{issue.state}</td>
                 <td>
                     <ButtonGroup>
                         {isEmperor && issue.state === "New" ?<Button size="sm" color="success" onClick={() => this.handleApprove(issue)}>Approve</Button>:""}
+                        {isTreasury && issue.state === "New" ?<Button size="sm" color="success" tag={Link} to={"/issues/" + issue.id}>Edit</Button>:""}
                         <Button size="sm" color="danger" onClick={() => this.remove(issue.id)}>Delete</Button>
                     </ButtonGroup>
                 </td>
@@ -54,7 +56,7 @@ class Issues extends Component {
         return (
             <div>
                 <Container fluid>
-                    { !isEmperor?
+                    { isTreasury?
                         <div className="float-right">
                             <Button color="success" tag={Link} to="/issues/new">Add Issue</Button>
                         </div>

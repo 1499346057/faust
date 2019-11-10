@@ -67,7 +67,10 @@ class Initializer implements CommandLineRunner {
         user.setUsername("user");
         user.setPassword(passwordEncoder.encode("123"));
         user.setEmail("user@treasury.com");
-        user.setAuthorities(Collections.singleton(authorities.get(AuthorityType.ROLE_USER)));
+        Set<Authority> authoritySet = new TreeSet<>();
+        authoritySet.addAll(authorities.values());
+        user.setAuthorities(authoritySet);
+        user.setMoney(500);
         users.add(user);
 
         userRepository.saveAll(users);

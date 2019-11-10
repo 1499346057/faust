@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.math.BigInteger;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -23,6 +24,8 @@ public class User {
     private String username;
     private String email;
     private long money;
+    @OneToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+    private Set<Exchange> exchanges;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_authority",

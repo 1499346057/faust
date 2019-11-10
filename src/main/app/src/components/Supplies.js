@@ -39,6 +39,7 @@ class Supplies extends Component {
         if (this.props.currentUser.groups) {
             isTreasury = this.props.currentUser.groups.indexOf("ROLE_TREASURY") >= 0;
         }
+        let isSupplier = this.props.currentUser.groups.indexOf("ROLE_SUPPLIER") >= 0;
 
         const supplyList = supplies.map(supply => {
             return <tr key={supply.id}>
@@ -59,7 +60,7 @@ class Supplies extends Component {
             <div>
                 <Container fluid>
                     <div className="float-right">
-                        {!isTreasury?
+                        { isSupplier?
                             <Button color="success" tag={Link} to="/supplies/new">Add Supply</Button>:''
                         }
                     </div>

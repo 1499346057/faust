@@ -18,6 +18,7 @@ public class Paper {
     private Long id;
     @NonNull
     private Long amount;
+    @NonNull Long total;
     @NonNull
     private Long value;
 }

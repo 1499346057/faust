@@ -15,19 +15,24 @@ const request = (options) => {
 
     return fetch(options.url, options)
         .then(response => {
-            if (!response.ok) {
-                return Promise.reject(response);
-            }
-
+            // if (!response.ok) {
+            //     return Promise.reject(response);
+            // }
             return response.text().then(text => {
                 if (text) {
                     let json = JSON.parse(text);
-                    return json;
+                    if (response.ok) {
+                        return json;
+                    }
+                    return Promise.reject(json);
                 } else {
+                    if (!response.ok) {
+                        return Promise.reject(response);
+                    }
                     return {};
                 }
             }).catch((error) => {
-                console.log('json parse error', error);
+                //console.log('json parse error', error);
                 return Promise.reject(error);
             });
         })
@@ -64,8 +69,7 @@ export function putIssue(issue) {
 export function getIssue(id) {
     return request({
         url: API_BASE_URL + "/treasury/issues/" + id,
-        method: 'GET',
-        body: JSON.stringify(id),
+        method: 'GET'
     });
 }
 
@@ -103,8 +107,7 @@ export function putSupply(issue) {
 export function getSupply(id) {
     return request({
         url: API_BASE_URL + "/treasury/supplies/" + id,
-        method: 'GET',
-        body: JSON.stringify(id),
+        method: 'GET'
     });
 }
 
@@ -141,4 +144,20 @@ export function redirectHandler(error) {
         NotificationManager.error('Treasury App err', error.message || 'Sorry! Something went wrong. Please try again!');
     }
     this.props.history.push('/');
+}
+
+export function getExchanges()
+{
+    return request({
+        url: API_BASE_URL + "/treasury/exchanges/",
+        method: 'GET'
+    });
+}
+
+export function makeExchange(amount) {
+    return request({
+        url: API_BASE_URL + "/treasury/exchanges/",
+        method: 'POST',
+        body: JSON.stringify(amount)
+    });
 }
