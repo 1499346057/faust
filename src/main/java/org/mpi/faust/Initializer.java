@@ -52,6 +52,7 @@ class Initializer implements CommandLineRunner {
         treasury.setPassword(passwordEncoder.encode("123"));
         treasury.setEmail("tres@treasury.com");
         treasury.setAuthorities(Collections.singleton(authorities.get(AuthorityType.ROLE_TREASURY)));
+        treasury.setMoney(100);
         users.add(treasury);
 
         User supplier = new User();
@@ -67,9 +68,7 @@ class Initializer implements CommandLineRunner {
         user.setUsername("user");
         user.setPassword(passwordEncoder.encode("123"));
         user.setEmail("user@treasury.com");
-        Set<Authority> authoritySet = new TreeSet<>();
-        authoritySet.addAll(authorities.values());
-        user.setAuthorities(authoritySet);
+        user.setAuthorities(Collections.singleton(authorities.get(AuthorityType.ROLE_USER)));
         user.setMoney(500);
         users.add(user);
 

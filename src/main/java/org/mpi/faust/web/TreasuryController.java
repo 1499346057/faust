@@ -2,6 +2,7 @@ package org.mpi.faust.web;
 
 
 import lombok.NonNull;
+import org.mpi.faust.exception.AppException;
 import org.mpi.faust.exception.BadRequestException;
 import org.mpi.faust.model.*;
 import org.mpi.faust.security.CurrentUser;
@@ -33,22 +34,21 @@ public class TreasuryController {
     private IssueRepository issueRepository;
     private SupplyRepository supplyRepository;
     private UserRepository userRepository;
-    public TreasuryController(IssueRepository issueRepository, SupplyRepository supplyRepository, UserRepository userRepository) {
+    private AuthorityRepository authorityRepository;
+    public TreasuryController(IssueRepository issueRepository, SupplyRepository supplyRepository, UserRepository userRepository, AuthorityRepository authorityRepository) {
         this.issueRepository = issueRepository;
         this.supplyRepository = supplyRepository;
         this.userRepository = userRepository;
+        this.authorityRepository = authorityRepository;
     }
 
-    private static boolean checkUSerForRole(UserPrincipal principal, String role)
-    {
+    private static boolean checkUSerForRole(UserPrincipal principal, String role) {
         return principal.getAuthorities().stream().anyMatch((p) -> ((GrantedAuthority) p).getAuthority().equals(role));
     }
 
     @GetMapping("/issues")
     @PreAuthorize("hasRole('ROLE_EMPEROR') or hasRole('ROLE_TREASURY')")
-    Collection<Issue> issues(@CurrentUser UserPrincipal principal) {
-        return issueRepository.findAll();
-    }
+    Collection<Issue> issues(@CurrentUser UserPrincipal principal) { return issueRepository.findAll(); }
 
     @GetMapping("/issues/{id}")
     @PreAuthorize("hasRole('ROLE_EMPEROR') or hasRole('ROLE_TREASURY')")
@@ -111,7 +111,7 @@ public class TreasuryController {
     @PostMapping("/supplies")
     @PreAuthorize("hasRole('ROLE_SUPPLIER')")
     ResponseEntity<Supply> CreateSupply(@Valid @RequestBody Supply supply, @CurrentUser UserPrincipal principal) throws URISyntaxException {
-        supply.setOwner(principal.getId());
+        supply.setOwner(userRepository.findById(principal.getId()).get());
         supply.setStatus("New");
         Supply result = supplyRepository.save(supply);
         return ResponseEntity.created(new URI("/api/v1/treasury/supplies/" + result.getId()))
@@ -129,6 +129,29 @@ public class TreasuryController {
         if(checkUSerForRole(principal, "ROLE_TREASURY")) {
             supply1.setStatus("Approved");
             supplyRepository.saveAndFlush(supply1);
+            Optional<Authority> authority = authorityRepository.findByName(AuthorityType.ROLE_TREASURY);
+            if (!authority.isPresent()) {
+                throw new AppException("No Treasury role in the system");
+            }
+            Optional<User> treasury = userRepository.getByAuthorities(Collections.singleton(authority.get()));
+            if (!treasury.isPresent()) {
+                throw new AppException("No Treasury user in the system");
+            }
+            long money = 0;
+            for (SupplyItem item : supply1.getItems()) {
+                money += item.getPrice();
+            }
+
+            if (treasury.get().getMoney() < money) {
+                throw new BadRequestException("Not enough money in Treasury");
+            }
+
+            // if enough money
+            treasury.get().setMoney(treasury.get().getMoney() - money);
+            userRepository.save(treasury.get());
+            User supplier = supply.getOwner();
+            supplier.setMoney(supplier.getMoney() + money);
+            userRepository.save(supplier);
             return ok(supply1);
         }
         else if(checkUSerForRole(principal, "ROLE_SUPPLIER")) {
@@ -232,9 +255,7 @@ public class TreasuryController {
 
         Pair<Long, List<Integer>> answer = knapSack(money, wt, n);
         if (answer.getValue0() != money) {
-            // "Cannot fulfil request"
             throw new BadRequestException("Cannot fulfil request");
-            //return ResponseEntity.badRequest().body(answer.getValue1());
         }
 
         Map<Integer, Integer> reduced = new TreeMap<>();
@@ -272,11 +293,16 @@ public class TreasuryController {
         Set<Exchange> exchanges = currentUser.getExchanges();
         exchanges.add(exchange);
         userRepository.save(currentUser);
-    }
 
-    @DeleteMapping("/exchanges/{id}")
-    @PreAuthorize("hasRole('ROLE_USER')")
-    ResponseEntity<?> RevertExchange(@PathVariable Long id, @CurrentUser UserPrincipal principal) {
-        return new ResponseEntity<>(HttpStatus.OK);
+        Optional<Authority> authority = authorityRepository.findByName(AuthorityType.ROLE_TREASURY);
+        if (!authority.isPresent()) {
+            throw new AppException("No Treasury role in the system");
+        }
+        Optional<User> treasury = userRepository.getByAuthorities(Collections.singleton(authority.get()));
+        if (!treasury.isPresent()) {
+            throw new AppException("No Treasury user in the system");
+        }
+        treasury.get().setMoney(treasury.get().getMoney() + money);
+        userRepository.save(treasury.get());
     }
 }

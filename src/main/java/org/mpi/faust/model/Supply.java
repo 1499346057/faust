@@ -20,8 +20,8 @@ public class Supply {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id ;
 
-    @Column
-    private Long owner;
+    @ManyToOne
+    private User owner;
 
     @Column
     private String status;

@@ -16,14 +16,18 @@ class Profile extends Component {
                     currentUser: response
                 });
 
-                getExchanges()
-                    .then(ex => {
-                        this.setState({exchanges: ex});
-                        this.setState({isLoading: false});
-                    })
-                    .catch(error => {
-                        redirectHandler.call(this, error);
-                    });
+                let isUser = this.state.currentUser.groups.indexOf("ROLE_USER") >= 0;
+                if (isUser) {
+                    getExchanges()
+                        .then(ex => {
+                            this.setState({exchanges: ex});
+                            this.setState({isLoading: false});
+                        })
+                        .catch(error => {
+                            redirectHandler.call(this, error);
+                        });
+                }
+                this.setState({isLoading: false});
             }).catch(error => {
                 redirectHandler.call(this, error);
             });
@@ -40,10 +44,13 @@ class Profile extends Component {
             );
         }
         let isUser = this.state.currentUser.groups.indexOf("ROLE_USER") >= 0;
+        let isEmperor= this.state.currentUser.groups.indexOf("ROLE_EMPEROR") >= 0;
         let jumbotronContent = [];
-        if (isUser) {
+        if (!isEmperor) {
             jumbotronContent.push(<h1 className="display-3">{this.state.currentUser.money} coins available</h1>);
-            jumbotronContent.push((this.state.exchanges && this.state.exchanges.length)?<p className="lead">Tickets: {this.printExchanges(this.state.exchanges)} </p>:"");
+        }
+        if (isUser) {
+            jumbotronContent.push((this.state.exchanges && this.state.exchanges.length)?<p className="lead">Bonds: {this.printExchanges(this.state.exchanges)} </p>:"");
             jumbotronContent.push(<p className="lead">Name: {this.state.currentUser.name}</p>);
         }
         else {
@@ -83,7 +90,7 @@ class Profile extends Component {
     printExchanges(exchanges) {
         return exchanges.map(exchange => {
             return exchange.papers.map(paper => {
-                return <span>{paper.amount} of value {paper.value} | </span>
+                return <span>{paper.amount} x par. {paper.value} | </span>
             })
         });
     }

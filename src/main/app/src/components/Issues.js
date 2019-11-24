@@ -40,7 +40,7 @@ class Issues extends Component {
         const issueList = issues.map(issue => {
             return <tr key={issue.id}>
                 <td>{issue.papers.map(paper => {
-                    return <div>{paper.amount} ({paper.total}) ; {paper.value}</div>
+                    return <div>{paper.amount} (of total {paper.total}) x par. {paper.value}</div>
                 })}</td>
                 <td>{issue.state}</td>
                 <td>
