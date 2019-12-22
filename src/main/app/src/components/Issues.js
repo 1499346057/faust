@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import React, { Component } from 'react';
 import { Button, ButtonGroup, Container, Table } from 'reactstrap';
 
-import {getIssues, putIssue, removeIssue, redirectHandler} from '../util/APIUtils';
+import {getIssues, removeIssue, redirectHandler, putIssue} from '../util/APIUtils';
 
 
 class Issues extends Component {
@@ -58,7 +58,7 @@ class Issues extends Component {
                 <Container fluid>
                     { isTreasury?
                         <div className="float-right">
-                            <Button color="success" tag={Link} to="/issues/new">Add Issue</Button>
+                            <Button color="success" tag={Link} to="/issues/new" id="addIssue">Add Issue</Button>
                         </div>
                         :''
                     }
