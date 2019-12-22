@@ -1,4 +1,4 @@
-package org.mpi.faust.payload;
+package org.mpi.faust.dto;
 
 public class JwtAuthenticationResponse {
     private String accessToken;

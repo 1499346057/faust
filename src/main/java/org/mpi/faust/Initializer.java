@@ -1,15 +1,11 @@
 package org.mpi.faust;
 
-import org.mpi.faust.exception.AppException;
-import org.mpi.faust.model.*;
+import org.mpi.faust.repository.AuthorityRepository;
+import org.mpi.faust.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import java.util.*;
-import java.util.stream.Stream;
-
 
 
 @Component

@@ -1,41 +1,30 @@
-package org.mpi.faust.web;
+package org.mpi.faust.service;
 
 
-import lombok.NonNull;
+import org.mpi.faust.dto.PaperAggregate;
 import org.mpi.faust.exception.AppException;
 import org.mpi.faust.exception.BadRequestException;
 import org.mpi.faust.model.*;
-import org.mpi.faust.security.CurrentUser;
+import org.mpi.faust.repository.AuthorityRepository;
+import org.mpi.faust.repository.IssueRepository;
+import org.mpi.faust.repository.SupplyRepository;
+import org.mpi.faust.repository.UserRepository;
 import org.mpi.faust.security.UserPrincipal;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
 
-import javax.print.attribute.standard.Media;
-import javax.validation.Valid;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
 
-import org.javatuples.*;
-
-import static java.lang.Integer.max;
-import static java.lang.Integer.min;
-import static org.springframework.http.ResponseEntity.ok;
-
-@RestController
-@RequestMapping("/api/v1/treasury")
-public class TreasuryController {
+@Service
+public class TreasuryServiceImpl implements TreasuryService {
     private IssueRepository issueRepository;
     private SupplyRepository supplyRepository;
     private UserRepository userRepository;
     private AuthorityRepository authorityRepository;
-    public TreasuryController(IssueRepository issueRepository, SupplyRepository supplyRepository, UserRepository userRepository, AuthorityRepository authorityRepository) {
+
+    public TreasuryServiceImpl(IssueRepository issueRepository, SupplyRepository supplyRepository, UserRepository userRepository, AuthorityRepository authorityRepository) {
         this.issueRepository = issueRepository;
         this.supplyRepository = supplyRepository;
         this.userRepository = userRepository;
@@ -46,87 +35,62 @@ public class TreasuryController {
         return principal.getAuthorities().stream().anyMatch((p) -> ((GrantedAuthority) p).getAuthority().equals(role));
     }
 
-    @GetMapping("/issues")
-    @PreAuthorize("hasRole('ROLE_EMPEROR') or hasRole('ROLE_TREASURY')")
-    Collection<Issue> issues(@CurrentUser UserPrincipal principal) { return issueRepository.findAll(); }
+    public Collection<Issue> getIssues() {
+        return issueRepository.findAll();
+    }
 
-    @GetMapping("/issues/{id}")
-    @PreAuthorize("hasRole('ROLE_EMPEROR') or hasRole('ROLE_TREASURY')")
-    ResponseEntity<?> getIssue(@PathVariable Long id, @CurrentUser UserPrincipal principal) {
+    public Optional<Issue> getIssue(Long id) {
         Optional<Issue> issue = issueRepository.findById(id);
-        return issue.map(response -> ok().body(response))
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        return issue;
     }
 
-    @DeleteMapping("/issues/{id}")
-    @PreAuthorize("hasRole('ROLE_EMPEROR') or hasRole('ROLE_TREASURY')")
-    ResponseEntity<?> delIssue(@PathVariable Long id) {
+    public void delIssue(Long id) {
         issueRepository.deleteById(id);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping("/issues")
-    @PreAuthorize("hasRole('ROLE_TREASURY')")
-    ResponseEntity<Issue> createIssue(@Valid @RequestBody Issue issue) throws URISyntaxException {
+    public Issue createIssue(Issue issue) {
         Issue result = issueRepository.save(issue);
-        return ResponseEntity.created(new URI("/api/v1/treasury/issues/" + result.getId()))
-                .body(result);
+        return result;
     }
 
-    @PutMapping("/issues/{id}")
-    @PreAuthorize("hasRole('ROLE_EMPEROR') or hasRole('ROLE_TREASURY')")
-    ResponseEntity<Issue> modifyIssue(@PathVariable Long id, @Valid @RequestBody Issue issue, @CurrentUser UserPrincipal principal) {
+    public Issue modifyIssue(Long id, Issue issue, UserPrincipal principal) {
         if (issue.getState() != IssueState.New) {
-            if (!checkUSerForRole(principal, "ROLE_EMPEROR"))
-            {
-                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            if (!checkUSerForRole(principal, "ROLE_EMPEROR")) {
+                throw new BadRequestException("Not enough permissions to approve issue");
             }
         }
         Issue result = issueRepository.save(issue);
-        return ok(result);
+        return result;
     }
 
 
-    @GetMapping("/supplies")
-    @PreAuthorize("hasRole('ROLE_TREASURY') or hasRole('ROLE_SUPPLIER')")
-    Collection<Supply> GetAllSupplies(){
+    public Collection<Supply> GetAllSupplies() {
         return supplyRepository.findAll();
     }
 
-    @GetMapping("/supplies/{id}")
-    @PreAuthorize("hasRole('ROLE_TREASURY') or hasRole('ROLE_SUPPLIER')")
-    ResponseEntity<?> GetSupply(@PathVariable Long id){
+    public Optional<Supply> GetSupply(Long id) {
         Optional<Supply> issue = supplyRepository.findById(id);
-        return issue.map(response -> ok().body(response))
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        return issue;
     }
 
-    @DeleteMapping("/supplies/{id}")
-    @PreAuthorize("hasRole('ROLE_TREASURY') or hasRole('ROLE_SUPPLIER')")
-    ResponseEntity DeleteSupply(@PathVariable Long id){
+    public void DeleteSupply(Long id) {
         supplyRepository.deleteById(id);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping("/supplies")
-    @PreAuthorize("hasRole('ROLE_SUPPLIER')")
-    ResponseEntity<Supply> CreateSupply(@Valid @RequestBody Supply supply, @CurrentUser UserPrincipal principal) throws URISyntaxException {
+    public Supply CreateSupply(Supply supply, UserPrincipal principal) {
         supply.setOwner(userRepository.findById(principal.getId()).get());
         supply.setStatus("New");
         Supply result = supplyRepository.save(supply);
-        return ResponseEntity.created(new URI("/api/v1/treasury/supplies/" + result.getId()))
-                .body(result);
+        return result;
     }
 
-    @PutMapping("/supplies/{id}")
-    @PreAuthorize("hasRole('ROLE_TREASURY') or hasRole('ROLE_SUPPLIER')")
-    ResponseEntity<?> UpdateSupply(@PathVariable Long id, @Valid @RequestBody Supply supply, @CurrentUser UserPrincipal principal) {
+    public void UpdateSupply(Long id, Supply supply, UserPrincipal principal) {
         Optional<Supply> supply1_opt = supplyRepository.findById(id);
         if (!supply1_opt.isPresent()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw new BadRequestException("Supply doesn't exist");
         }
         Supply supply1 = supply1_opt.get();
-        if(checkUSerForRole(principal, "ROLE_TREASURY")) {
+        if (checkUSerForRole(principal, "ROLE_TREASURY")) {
             supply1.setStatus("Approved");
             supplyRepository.saveAndFlush(supply1);
             Optional<Authority> authority = authorityRepository.findByName(AuthorityType.ROLE_TREASURY);
@@ -152,35 +116,26 @@ public class TreasuryController {
             User supplier = supply.getOwner();
             supplier.setMoney(supplier.getMoney() + money);
             userRepository.save(supplier);
-            return ok(supply1);
-        }
-        else if(checkUSerForRole(principal, "ROLE_SUPPLIER")) {
+        } else if (checkUSerForRole(principal, "ROLE_SUPPLIER")) {
             supply1.setItems(supply.getItems());
             supply1.setStatus(supply.getStatus());
             supplyRepository.saveAndFlush(supply1);
-            return ok(supply1);
         }
 
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        throw new BadRequestException("Wrong enough permissions");
     }
 
-    @GetMapping("/exchanges")
-    @PreAuthorize("hasRole('ROLE_USER')")
-    Collection<PaperAggregate> GetExchangeTable(@CurrentUser UserPrincipal principal) {
+    public Collection<PaperAggregate> GetExchangeTable() {
         return issueRepository.getAggregatePapers();
     }
 
-    @PostMapping(value = "/exchanges", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasRole('ROLE_USER')")
-    ResponseEntity<?> MakeExchange(@Valid @RequestBody Map<Long, Long> requested, @CurrentUser UserPrincipal principal) {
+    public void MakeExchange(Map<Long, Long> requested, UserPrincipal principal) {
         exchangeMoney(requested, principal);
-
-        return ResponseEntity.ok().body(new StringResponse("Successfully exchanged money."));
     }
 
 
-    @Transactional(rollbackFor=Exception.class, propagation=Propagation.REQUIRED)
-    void exchangeMoney(Map<Long, Long> requested, @CurrentUser UserPrincipal principal) {
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    private void exchangeMoney(Map<Long, Long> requested, UserPrincipal principal) {
         long money = 0;
         for (Long val : requested.keySet()) {
             Long amount = requested.get(val);
@@ -248,3 +203,5 @@ public class TreasuryController {
         userRepository.save(treasury.get());
     }
 }
+
+

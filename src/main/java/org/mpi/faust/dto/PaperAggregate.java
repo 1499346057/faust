@@ -1,4 +1,4 @@
-package org.mpi.faust.model;
+package org.mpi.faust.dto;
 
 public class PaperAggregate {
     private final long amount;

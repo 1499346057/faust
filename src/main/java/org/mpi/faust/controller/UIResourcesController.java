@@ -1,4 +1,4 @@
-package org.mpi.faust.web;
+package org.mpi.faust.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;

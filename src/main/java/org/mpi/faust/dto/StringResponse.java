@@ -1,9 +1,9 @@
-package org.mpi.faust.web;
+package org.mpi.faust.dto;
 
 public class StringResponse {
     private String message;
 
-    StringResponse(String message)
+    public StringResponse(String message)
     {
         this.setMessage(message);
     }

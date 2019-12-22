@@ -1,4 +1,4 @@
-package org.mpi.faust.payload;
+package org.mpi.faust.dto;
 
 import java.math.BigInteger;
 import java.util.List;
