@@ -2,14 +2,27 @@ import React, { Component } from 'react';
 import {Button, Container, Form, FormGroup, Input, Label, Table} from 'reactstrap';
 import {makeExchange} from "../util/APIUtils";
 import {NotificationManager} from 'react-notifications';
+import NumberInput from "../util/NumberInput";
+import {breakStatement} from "@babel/types";
 
 class Exchange extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
+            table: [],
+            res: {}
         };
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleChange = this.handleChange.bind(this);
+    }
+
+    componentDidMount() {
+        APIUtils.getExchangeTable()
+            .then(data => this.setState({table: data}))
+            .catch(error => {
+                APIUtils.redirectHandler.call(this, error);
+            });
     }
 
     async handleSubmit(event) {
@@ -23,17 +36,21 @@ class Exchange extends Component {
         });
     }
 
+    async handleChange(value, amount) {
+        let res = this.state.res;
+        res[value] = amount;
+        this.setState({res: res});
+    }
+
     render() {
         return <div>
             <Container>
                 <Form>
-                    <div className="row">
-                        <FormGroup className="col-md-4 mb-3">
-                            <Label for="value">Amount</Label>
-                            <Input type="number" name="amount" id="amount" value={this.state.amount || ''}
-                                   onChange={e => this.setState({amount: e.target.value})}/>
-                        </FormGroup>
-                    </div>
+                    {
+                        this.state.table.map(function(row) {
+                            return <NumberInput onChange={this.handleChange} value={row.value} amount={row.amount}/>
+                        }, this)
+                    }
                 </Form>
                 <Button color="primary" onClick={this.handleSubmit}>Exchange</Button>
             </Container>

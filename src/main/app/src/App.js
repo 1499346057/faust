@@ -28,6 +28,7 @@ import PrivateRoute from "./common/PrivateRoute";
 import {Container} from "reactstrap";
 import Footer from "./common/Footer";
 import Exchange from "./components/Exchange";
+import Notfound from "./components/Notfound";
 
 
 class App extends Component {
@@ -104,13 +105,14 @@ class App extends Component {
                     <div className="app-content">
                         <Switch>
                             <Route exact path="/" render={(props) => <Home isAuthenticated={this.state.isAuthenticated} currentUser={this.state.currentUser} handleLogout={this.handleLogout} {...props} />} />
-                        <Route path='/login' exact={true} render={(props) => <Login onLogin={this.handleLogin} {...props} />} />
+                            <Route path='/login' exact={true} render={(props) => <Login onLogin={this.handleLogin} {...props} />} />
                             <PrivateRoute component={Issues}  isAuthenticated={this.state.isAuthenticated}  path="/issues" exact={true} currentUser={this.state.currentUser}/>
                             <PrivateRoute component={IssueEdit} isAuthenticated={this.state.isAuthenticated}  path="/issues/:id" currentUser={this.state.currentUser} />
                             <PrivateRoute component={Supplies} isAuthenticated={this.state.isAuthenticated}  path="/supplies" exact={true} currentUser={this.state.currentUser}/>
                             <PrivateRoute component={SupplyEdit} isAuthenticated={this.state.isAuthenticated}  path="/supplies/:id" currentUser={this.state.currentUser}/>
                             <PrivateRoute component={Profile} isAuthenticated={this.state.isAuthenticated}  path="/profile" exact={true} currentUser={this.state.currentUser}/>
                             <PrivateRoute component={Exchange} isAuthenticated={this.state.isAuthenticated}  path="/exchange" exact={true} currentUser={this.state.currentUser}/>
+                            <Route component={Notfound}/>
                         </Switch>
                     </div>
                     <Footer />

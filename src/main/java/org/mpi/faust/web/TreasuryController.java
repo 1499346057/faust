@@ -166,123 +166,65 @@ public class TreasuryController {
 
     @GetMapping("/exchanges")
     @PreAuthorize("hasRole('ROLE_USER')")
-    Collection<Exchange> GetAllExchanges(@CurrentUser UserPrincipal principal) {
-        long userId = principal.getId();
-        User user = userRepository.getOne(userId);
-        return user.getExchanges();
+    Collection<PaperAggregate> GetExchangeTable(@CurrentUser UserPrincipal principal) {
+        return issueRepository.getAggregatePapers();
     }
-
-    // Damn copy paste
-    private static Pair<Long, List<Integer>> knapSack(int W, int wt[], int n)
-    {
-        int i, w;
-        int[][] K = new int[n + 1][W + 1];
-
-        for (i = 0; i <= n; i++)
-        {
-            for (w = 0; w <= W; w++)
-            {
-                if (i==0 || w==0)
-                    K[i][w] = 0;
-                else if (wt[i-1] <= w) {
-                    if (wt[i - 1] + K[i - 1][w - wt[i - 1]] > K[i - 1][w]) {
-                        K[i][w] = wt[i - 1] + K[i - 1][w - wt[i - 1]];
-                    }
-                    else {
-                        K[i][w] = K[i - 1][w];
-                    }
-                }
-                else
-                    K[i][w] = K[i-1][w];
-            }
-        }
-
-        List<Integer> backtrack = new ArrayList<>();
-        i = n;
-        long prev = K[n][W];
-        while (prev != 0) {
-            if (K[i][W] != K[i - 1][W]) {
-                backtrack.add(wt[i - 1]);
-                prev -= wt[i - 1];
-            }
-            i -= 1;
-        }
-
-        return new Pair<Long, List<Integer>>((long) K[n][W], backtrack);
-    }
-
 
     @PostMapping(value = "/exchanges", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ROLE_USER')")
-    ResponseEntity<?> MakeExchange(@Valid @RequestBody int money, @CurrentUser UserPrincipal principal) {
-        exchangeMoney(money, principal);
+    ResponseEntity<?> MakeExchange(@Valid @RequestBody Map<Long, Long> requested, @CurrentUser UserPrincipal principal) {
+        exchangeMoney(requested, principal);
 
         return ResponseEntity.ok().body(new StringResponse("Successfully exchanged money."));
     }
 
+
     @Transactional(rollbackFor=Exception.class, propagation=Propagation.REQUIRED)
-    void exchangeMoney(@RequestBody @Valid int money, @CurrentUser UserPrincipal principal) {
+    void exchangeMoney(Map<Long, Long> requested, @CurrentUser UserPrincipal principal) {
+        long money = 0;
+        for (Long val : requested.keySet()) {
+            Long amount = requested.get(val);
+            money += val * amount;
+        }
         if (principal.getMoney() < money) {
-            throw new BadRequestException("Not enough money");
-            //return ResponseEntity.unprocessableEntity().body("Not enough money");
+            throw new BadRequestException("User has not enough money.");
         }
-        if (money < 0) {
-            throw new BadRequestException("Money must be non-negative integer");
-            //return ResponseEntity.unprocessableEntity().body("Money must non-negative integer");
+        if (requested.size() == 0) {
+            return;
         }
 
-        // get all papers
-        int n = 0;
-        List<Issue> issues = issueRepository.findAll();
-        Map<Long, Long> map = new TreeMap<>();
-        for (Issue issue : issues) {
-            if (issue.getState() != IssueState.Approved) {
-                continue;
-            }
-            for (Paper paper : issue.getPapers()) {
-                map.merge(paper.getValue(), paper.getAmount(), Long::sum);
-                n += paper.getAmount();
-            }
-        }
-        int[] wt = new int[n];
-        final int[] i = {0};
-        map.forEach((Long value, Long amount) -> {
-            for (int j = 0; j < amount; j++) {
-                wt[i[0] + j] = value.intValue();
-            }
-            i[0] += amount;
-        });
-
-        Pair<Long, List<Integer>> answer = knapSack(money, wt, n);
-        if (answer.getValue0() != money) {
-            throw new BadRequestException("Cannot fulfil request");
-        }
-
-        Map<Integer, Integer> reduced = new TreeMap<>();
-        for (Integer b : answer.getValue1()) {
-            reduced.merge(b, 1, Integer::sum);
-        }
         List<Paper> papers_final = new ArrayList<>();
-
-        for (Issue issue : issues) {
-            List<Paper> papers = issue.getPapers();
-            for (Paper paper : papers) {
-                for (Integer key : reduced.keySet()) {
-                    if (paper.getValue().intValue() == key) {
-                        int minVal = min(paper.getAmount().intValue(), reduced.get(key));
-                        if (reduced.get(key) == minVal) {
-                            reduced.replace(key, 0);
-                            issue.getPapers().get(issue.getPapers().indexOf(paper)).setAmount(paper.getAmount() - minVal);
-                        }
-                        Paper p = new Paper();
-                        p.setValue(Long.valueOf(key));
-                        p.setAmount(Long.valueOf(minVal));
-                        p.setTotal(Long.valueOf(minVal));
-                        papers_final.add(p);
+        List<Issue> issues = issueRepository.findAll();
+        for (Long value : requested.keySet()) {
+            Paper paper_final = new Paper();
+            paper_final.setAmount(0L);
+            paper_final.setValue(value);
+            for (Issue issue : issues) {
+                boolean changed = false;
+                for (Paper paper : issue.getPapers()) {
+                    if (!paper.getValue().equals(value)) {
+                        continue;
                     }
+                    if (requested.get(value) <= paper.getAmount()) {
+                        paper.setAmount(paper.getAmount() - requested.get(value));
+                        paper_final.setAmount(paper_final.getAmount() + requested.get(value));
+                        requested.replace(value, 0L);
+                        changed = true;
+                        continue;
+                    }
+                    requested.merge(value, -paper.getAmount(), Long::sum);
+                    paper_final.setAmount(paper_final.getAmount() + paper.getAmount());
+                    paper.setAmount(0L);
+                    changed = true;
+                }
+                if (changed) {
+                    issueRepository.save(issue);
+                    papers_final.add(paper_final);
                 }
             }
-            issueRepository.save(issue);
+            if (requested.get(value) != 0) {
+                throw new BadRequestException("Cannot fulfil request, not enough papers in Treasury.");
+            }
         }
 
         // transactionally substract money and move papers from issues to exchange

@@ -87,6 +87,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .antMatchers(HttpMethod.GET, "/api/v1/polls/**", "/api/v1/users/**")
                 .permitAll()
+                .antMatchers("/**/{path:[^\\.]*}")
+                .permitAll()
                 .anyRequest()
                 .authenticated();
 

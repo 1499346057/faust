@@ -14,7 +14,7 @@ import java.util.List;
 @Table(name = "treasury_issues")
 public class Issue {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Builder.Default

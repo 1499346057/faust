@@ -12,7 +12,7 @@ import javax.persistence.*;
 @Table(name = "authority")
 public class Authority implements java.lang.Comparable {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @Enumerated(EnumType.STRING)
     private AuthorityType name;

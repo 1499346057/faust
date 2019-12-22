@@ -14,7 +14,7 @@ import java.util.List;
 @Table(name = "treasury_exchanges")
 public class Exchange {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
