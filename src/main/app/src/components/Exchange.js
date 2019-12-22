@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {Button, Container, Form, FormGroup, Input, Label, Table} from 'reactstrap';
-import {makeExchange} from "../util/APIUtils";
+import {makeExchange, getExchangeTable, redirectHandler} from "../util/APIUtils";
 import {NotificationManager} from 'react-notifications';
 import NumberInput from "../util/NumberInput";
 import {breakStatement} from "@babel/types";
@@ -18,10 +18,10 @@ class Exchange extends Component {
     }
 
     componentDidMount() {
-        APIUtils.getExchangeTable()
+        getExchangeTable()
             .then(data => this.setState({table: data}))
             .catch(error => {
-                APIUtils.redirectHandler.call(this, error);
+                redirectHandler.call(this, error);
             });
     }
 

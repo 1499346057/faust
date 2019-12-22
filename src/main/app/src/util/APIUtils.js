@@ -146,8 +146,7 @@ export function redirectHandler(error) {
     this.props.history.push('/');
 }
 
-export function getExchanges()
-{
+export function getExchanges() {
     return request({
         url: API_BASE_URL + "/treasury/exchanges/",
         method: 'GET'
@@ -159,5 +158,12 @@ export function makeExchange(amount) {
         url: API_BASE_URL + "/treasury/exchanges/",
         method: 'POST',
         body: JSON.stringify(amount)
+    });
+}
+
+export function getExchangeTable() {
+    return request({
+        url: API_BASE_URL + "/treasury/exchanges/",
+        method: 'GET'
     });
 }
