@@ -40,7 +40,7 @@ export default function register() {
         // service worker/PWA documentation.
         navigator.serviceWorker.ready.then(() => {
           console.log(
-              'This web app is being served cache-first by a service ' +
+              'This controller app is being served cache-first by a service ' +
               'worker. To learn more, visit https://goo.gl/SC7cgQ'
           );
         });
@@ -64,7 +64,7 @@ function registerValidSW(swUrl) {
                 // At this point, the old content will have been purged and
                 // the fresh content will have been added to the cache.
                 // It's the perfect time to display a "New content is
-                // available; please refresh." message in your web app.
+                // available; please refresh." message in your controller app.
                 console.log('New content is available; please refresh.');
               } else {
                 // At this point, everything has been precached.

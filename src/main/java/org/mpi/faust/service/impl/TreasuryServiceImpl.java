@@ -1,4 +1,4 @@
-package org.mpi.faust.service;
+package org.mpi.faust.service.impl;
 
 
 import org.mpi.faust.dto.PaperAggregate;
@@ -10,6 +10,8 @@ import org.mpi.faust.repository.IssueRepository;
 import org.mpi.faust.repository.SupplyRepository;
 import org.mpi.faust.repository.UserRepository;
 import org.mpi.faust.security.UserPrincipal;
+import org.mpi.faust.service.TreasuryService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -19,16 +21,16 @@ import java.util.*;
 
 @Service
 public class TreasuryServiceImpl implements TreasuryService {
+    @Autowired
     private IssueRepository issueRepository;
+    @Autowired
     private SupplyRepository supplyRepository;
+    @Autowired
     private UserRepository userRepository;
+    @Autowired
     private AuthorityRepository authorityRepository;
 
-    public TreasuryServiceImpl(IssueRepository issueRepository, SupplyRepository supplyRepository, UserRepository userRepository, AuthorityRepository authorityRepository) {
-        this.issueRepository = issueRepository;
-        this.supplyRepository = supplyRepository;
-        this.userRepository = userRepository;
-        this.authorityRepository = authorityRepository;
+    public TreasuryServiceImpl() {
     }
 
     private static boolean checkUSerForRole(UserPrincipal principal, String role) {
@@ -116,13 +118,17 @@ public class TreasuryServiceImpl implements TreasuryService {
             User supplier = supply.getOwner();
             supplier.setMoney(supplier.getMoney() + money);
             userRepository.save(supplier);
+
+            return;
         } else if (checkUSerForRole(principal, "ROLE_SUPPLIER")) {
             supply1.setItems(supply.getItems());
             supply1.setStatus(supply.getStatus());
             supplyRepository.saveAndFlush(supply1);
+
+            return;
         }
 
-        throw new BadRequestException("Wrong enough permissions");
+        throw new BadRequestException("Wrong permissions");
     }
 
     public Collection<PaperAggregate> GetExchangeTable() {
@@ -132,7 +138,6 @@ public class TreasuryServiceImpl implements TreasuryService {
     public void MakeExchange(Map<Long, Long> requested, UserPrincipal principal) {
         exchangeMoney(requested, principal);
     }
-
 
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     private void exchangeMoney(Map<Long, Long> requested, UserPrincipal principal) {

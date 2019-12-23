@@ -1,10 +1,11 @@
-package org.mpi.faust.service;
+package org.mpi.faust.service.impl;
 
 import org.mpi.faust.model.Exchange;
 import org.mpi.faust.model.User;
 import org.mpi.faust.repository.UserRepository;
 import org.mpi.faust.security.UserPrincipal;
 import org.mpi.faust.dto.UserSummary;
+import org.mpi.faust.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;

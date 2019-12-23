@@ -1,10 +1,11 @@
-package org.mpi.faust.service;
+package org.mpi.faust.service.impl;
 
 import org.mpi.faust.dto.JwtAuthenticationResponse;
 import org.mpi.faust.dto.LoginRequest;
 import org.mpi.faust.repository.AuthorityRepository;
 import org.mpi.faust.repository.UserRepository;
 import org.mpi.faust.security.JwtTokenProvider;
+import org.mpi.faust.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
