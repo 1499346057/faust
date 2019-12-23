@@ -148,7 +148,7 @@ export function redirectHandler(error) {
 
 export function getExchanges() {
     return request({
-        url: API_BASE_URL + "/treasury/exchanges/",
+        url: API_BASE_URL + "/user/exchanges/",
         method: 'GET'
     });
 }
