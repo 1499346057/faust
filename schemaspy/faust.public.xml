@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<database name="faust" schema="public" type="PostgreSQL - 12.1 (Debian 12.1-1)">
+   <sequences>
+      <sequence increment="1" name="authority_id_seq" startValue="1"/>
+      <sequence increment="1" name="papers_id_seq" startValue="1"/>
+      <sequence increment="1" name="supplies_id_seq" startValue="1"/>
+      <sequence increment="1" name="supply_item_id_seq" startValue="1"/>
+      <sequence increment="1" name="treasury_exchanges_id_seq" startValue="1"/>
+      <sequence increment="1" name="treasury_issues_id_seq" startValue="1"/>
+      <sequence increment="1" name="users_id_seq" startValue="1"/>
+   </sequences>
+   <tables>
+      <table name="authority" numRows="4" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('authority_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial" typeCode="4">
+            <child column="authority_id" foreignKey="fkgvxjs381k6f48d5d2yi11uh89" implied="false" onDeleteCascade="false" schema="public" table="user_authority"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="name" nullable="true" remarks="" size="255" type="varchar" typeCode="12"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="authority_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+      <table name="papers" numRows="5" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('papers_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="19" type="bigserial" typeCode="-5">
+            <child column="papers_id" foreignKey="fke775byra30yey9mromr4rup5j" implied="false" onDeleteCascade="false" schema="public" table="treasury_exchanges_papers"/>
+            <child column="papers_id" foreignKey="fkpn42rs0rv6yql2rshpejooadd" implied="false" onDeleteCascade="false" schema="public" table="treasury_issues_papers"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="amount" nullable="true" remarks="" size="19" type="int8" typeCode="-5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="total" nullable="true" remarks="" size="19" type="int8" typeCode="-5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="value" nullable="true" remarks="" size="19" type="int8" typeCode="-5"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="papers_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+      <table name="supplies" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('supplies_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="19" type="bigserial" typeCode="-5">
+            <child column="supply_id" foreignKey="fkq6fgbwirhyvmvpcm7onuct390" implied="false" onDeleteCascade="false" schema="public" table="supplies_items"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="status" nullable="true" remarks="" size="255" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="owner_id" nullable="true" remarks="" size="19" type="int8" typeCode="-5">
+            <parent column="id" foreignKey="FK_OwnerId" implied="false" onDeleteCascade="false" schema="public" table="users"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="supplies_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+      <table name="supplies_items" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="supply_id" nullable="false" remarks="" size="19" type="int8" typeCode="-5">
+            <parent column="id" foreignKey="fkq6fgbwirhyvmvpcm7onuct390" implied="false" onDeleteCascade="false" schema="public" table="supplies"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="items_id" nullable="false" remarks="" size="19" type="int8" typeCode="-5">
+            <parent column="id" foreignKey="fknn61ff5xdayqafpd7wfa52b2n" implied="false" onDeleteCascade="false" schema="public" table="supply_item"/>
+         </column>
+         <index name="uk_6fk9jejk2owvbfjcacxloxabf" unique="true">
+            <column ascending="true" name="items_id"/>
+         </index>
+      </table>
+      <table name="supply_item" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('supply_item_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="19" type="bigserial" typeCode="-5">
+            <child column="items_id" foreignKey="fknn61ff5xdayqafpd7wfa52b2n" implied="false" onDeleteCascade="false" schema="public" table="supplies_items"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="good" nullable="true" remarks="" size="255" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="price" nullable="true" remarks="" size="19" type="int8" typeCode="-5"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="supply_item_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+      <table name="treasury_exchanges" numRows="2" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('treasury_exchanges_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="19" type="bigserial" typeCode="-5">
+            <child column="exchange_id" foreignKey="fkou24lkcwp8ajnfphgya5jsl01" implied="false" onDeleteCascade="false" schema="public" table="treasury_exchanges_papers"/>
+            <child column="exchanges_id" foreignKey="fkcru09w43rgdouqj2bibw58rtd" implied="false" onDeleteCascade="false" schema="public" table="users_exchanges"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="treasury_exchanges_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+      <table name="treasury_exchanges_papers" numRows="2" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="exchange_id" nullable="false" remarks="" size="19" type="int8" typeCode="-5">
+            <parent column="id" foreignKey="fkou24lkcwp8ajnfphgya5jsl01" implied="false" onDeleteCascade="false" schema="public" table="treasury_exchanges"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="papers_id" nullable="false" remarks="" size="19" type="int8" typeCode="-5">
+            <parent column="id" foreignKey="fke775byra30yey9mromr4rup5j" implied="false" onDeleteCascade="false" schema="public" table="papers"/>
+         </column>
+         <index name="uk_rw5x3omb1b2n4bp5bryxyqv7c" unique="true">
+            <column ascending="true" name="papers_id"/>
+         </index>
+      </table>
+      <table name="treasury_issues" numRows="1" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('treasury_issues_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="19" type="bigserial" typeCode="-5">
+            <child column="issue_id" foreignKey="fkcola0reoc4h7goelcgn6chsey" implied="false" onDeleteCascade="false" schema="public" table="treasury_issues_papers"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="state" nullable="true" remarks="" size="10" type="int4" typeCode="4"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="treasury_issues_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+      <table name="treasury_issues_papers" numRows="3" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="issue_id" nullable="false" remarks="" size="19" type="int8" typeCode="-5">
+            <parent column="id" foreignKey="fkcola0reoc4h7goelcgn6chsey" implied="false" onDeleteCascade="false" schema="public" table="treasury_issues"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="papers_id" nullable="false" remarks="" size="19" type="int8" typeCode="-5">
+            <parent column="id" foreignKey="fkpn42rs0rv6yql2rshpejooadd" implied="false" onDeleteCascade="false" schema="public" table="papers"/>
+         </column>
+         <index name="uk_dy7ckfgammj78rairb8qadrx6" unique="true">
+            <column ascending="true" name="papers_id"/>
+         </index>
+      </table>
+      <table name="user_authority" numRows="4" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="user_id" nullable="false" remarks="" size="19" type="int8" typeCode="-5">
+            <parent column="id" foreignKey="fkhi46vu7680y1hwvmnnuh4cybx" implied="false" onDeleteCascade="false" schema="public" table="users"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="authority_id" nullable="false" remarks="" size="10" type="int4" typeCode="4">
+            <parent column="id" foreignKey="fkgvxjs381k6f48d5d2yi11uh89" implied="false" onDeleteCascade="false" schema="public" table="authority"/>
+         </column>
+         <primaryKey column="user_id" sequenceNumberInPK="1"/>
+         <primaryKey column="authority_id" sequenceNumberInPK="2"/>
+         <index name="user_authority_pkey" unique="true">
+            <column ascending="true" name="user_id"/>
+            <column ascending="true" name="authority_id"/>
+         </index>
+      </table>
+      <table name="users" numRows="4" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('users_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="19" type="bigserial" typeCode="-5">
+            <child column="owner_id" foreignKey="FK_OwnerId" implied="false" onDeleteCascade="false" schema="public" table="supplies"/>
+            <child column="user_id" foreignKey="fkhi46vu7680y1hwvmnnuh4cybx" implied="false" onDeleteCascade="false" schema="public" table="user_authority"/>
+            <child column="user_id" foreignKey="fkh3qvnsfqw3doan6kl8pqj17vu" implied="false" onDeleteCascade="false" schema="public" table="users_exchanges"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="email" nullable="true" remarks="" size="255" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="money" nullable="false" remarks="" size="19" type="int8" typeCode="-5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="name" nullable="true" remarks="" size="255" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="4" name="password" nullable="true" remarks="" size="255" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="username" nullable="true" remarks="" size="255" type="varchar" typeCode="12"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="users_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="uk_r43af9ap4edm43mmtq01oddj6" unique="true">
+            <column ascending="true" name="username"/>
+         </index>
+      </table>
+      <table name="users_exchanges" numRows="2" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="user_id" nullable="false" remarks="" size="19" type="int8" typeCode="-5">
+            <parent column="id" foreignKey="fkh3qvnsfqw3doan6kl8pqj17vu" implied="false" onDeleteCascade="false" schema="public" table="users"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="exchanges_id" nullable="false" remarks="" size="19" type="int8" typeCode="-5">
+            <parent column="id" foreignKey="fkcru09w43rgdouqj2bibw58rtd" implied="false" onDeleteCascade="false" schema="public" table="treasury_exchanges"/>
+         </column>
+         <primaryKey column="user_id" sequenceNumberInPK="1"/>
+         <primaryKey column="exchanges_id" sequenceNumberInPK="2"/>
+         <index name="users_exchanges_pkey" unique="true">
+            <column ascending="true" name="user_id"/>
+            <column ascending="true" name="exchanges_id"/>
+         </index>
+         <index name="uk_5ayy0v32xwp6fpaip1g0w0djs" unique="true">
+            <column ascending="true" name="exchanges_id"/>
+         </index>
+      </table>
+   </tables>
+</database>

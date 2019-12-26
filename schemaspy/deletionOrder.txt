@@ -1,0 +1,12 @@
+users_exchanges
+user_authority
+treasury_issues_papers
+treasury_exchanges_papers
+supplies_items
+supplies
+treasury_issues
+supply_item
+authority
+treasury_exchanges
+papers
+users
