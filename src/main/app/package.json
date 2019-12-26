@@ -41,6 +41,10 @@
     ]
   },
   "devDependencies": {
-    "@testing-library/react": "^9.4.0"
+    "@testing-library/react": "^9.4.0",
+    "faker": "^4.1.0",
+    "jest": "^24.7.1",
+    "jest-cli": "^24.7.1",
+    "puppeteer": "^2.0.0"
   }
 }

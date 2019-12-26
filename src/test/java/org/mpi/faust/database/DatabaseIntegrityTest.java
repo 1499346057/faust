@@ -15,6 +15,11 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.swing.text.html.Option;
+import java.util.Optional;
+
+import static org.assertj.core.api.Java6Assertions.assertThat;
+
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -34,9 +39,8 @@ public class DatabaseIntegrityTest {
     @Autowired
     IssueRepository issueRepository;
 
-    @Test
-    public void whenUserHaveSupplies_thenFailDeleteUser()
-    {
+    @Test(expected = org.springframework.dao.DataIntegrityViolationException.class)
+    public void whenUserHaveSupplies_thenFailDeleteUser() {
         User user = new User();
         entityManager.persistFlushFind(user);
         Supply supply = new Supply();
@@ -44,5 +48,6 @@ public class DatabaseIntegrityTest {
         entityManager.persistAndFlush(supply);
 
         userRepository.deleteById(user.getId());
+        userRepository.flush();
     }
 }
