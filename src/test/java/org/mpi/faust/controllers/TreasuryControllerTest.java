@@ -1,0 +1,23 @@
+package org.mpi.faust.controllers;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mpi.faust.controller.TreasuryController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class TreasuryControllerTest {
+    @Autowired
+    TreasuryController treasuryController;
+
+    @Test
+    public void contexLoads() throws Exception {
+        assertThat(treasuryController).isNotNull();
+    }
+}

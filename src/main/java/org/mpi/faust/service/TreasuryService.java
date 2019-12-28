@@ -16,11 +16,11 @@ public interface TreasuryService {
 
     Issue modifyIssue(Long id, Issue issue, UserPrincipal principal);
 
-    Collection<Supply> GetAllSupplies();
+    Collection<Supply> GetAllSupplies(UserPrincipal userPrincipal);
 
-    Optional<Supply> GetSupply(Long id);
+    Optional<Supply> GetSupply(Long id, UserPrincipal userPrincipal);
 
-    void DeleteSupply(Long id);
+    void DeleteSupply(Long id, UserPrincipal userPrincipal);
 
     Supply CreateSupply(Supply supply, UserPrincipal principal);
 

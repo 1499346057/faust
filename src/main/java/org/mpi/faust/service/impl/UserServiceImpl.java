@@ -16,13 +16,16 @@ import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
-    @Autowired
     private UserRepository userRepository;
+
+    UserServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
 
     public UserSummary getCurrentUser(UserPrincipal currentUser) {
         List<String> groups = new ArrayList<>();
-        currentUser.getAuthorities().forEach(authority -> groups.add(((SimpleGrantedAuthority)authority).getAuthority()));
+        currentUser.getAuthorities().forEach(authority -> groups.add(authority.getAuthority()));
         UserSummary userSummary = new UserSummary(currentUser.getId(), currentUser.getUsername(), currentUser.getName(), groups, currentUser.getMoney());
         return userSummary;
     }

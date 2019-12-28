@@ -30,11 +30,15 @@ public class TreasuryServiceImpl implements TreasuryService {
     @Autowired
     private AuthorityRepository authorityRepository;
 
-    public TreasuryServiceImpl() {
+    public TreasuryServiceImpl(IssueRepository issueRepository, SupplyRepository supplyRepository, UserRepository userRepository, AuthorityRepository authorityRepository) {
+        this.issueRepository = issueRepository;
+        this.supplyRepository = supplyRepository;
+        this.userRepository = userRepository;
+        this.authorityRepository = authorityRepository;
     }
 
     private static boolean checkUSerForRole(UserPrincipal principal, String role) {
-        return principal.getAuthorities().stream().anyMatch((p) -> ((GrantedAuthority) p).getAuthority().equals(role));
+        return principal.getAuthorities().stream().anyMatch((p) -> p.getAuthority().equals(role));
     }
 
     public Collection<Issue> getIssues() {
@@ -66,16 +70,24 @@ public class TreasuryServiceImpl implements TreasuryService {
     }
 
 
-    public Collection<Supply> GetAllSupplies() {
-        return supplyRepository.findAll();
+    public Collection<Supply> GetAllSupplies(UserPrincipal userPrincipal) {
+        return supplyRepository.findByOwnerId(userPrincipal.getId());
     }
 
-    public Optional<Supply> GetSupply(Long id) {
-        Optional<Supply> issue = supplyRepository.findById(id);
-        return issue;
+    public Optional<Supply> GetSupply(Long id, UserPrincipal userPrincipal) {
+        Optional<Supply> supply = supplyRepository.findById(id);
+        if (!supply.get().getOwner().getId().equals(userPrincipal.getId())) {
+            throw new BadRequestException("Not enough permissions to get supply");
+        }
+        return supply;
     }
 
-    public void DeleteSupply(Long id) {
+    public void DeleteSupply(Long id, UserPrincipal principal) {
+        Optional<Supply> supply = supplyRepository.findById(id);
+        if (!supply.get().getOwner().getId().equals(principal.getId())) {
+            throw new BadRequestException("Not enough permissions to get supply");
+        }
+
         supplyRepository.deleteById(id);
     }
 
@@ -140,7 +152,7 @@ public class TreasuryServiceImpl implements TreasuryService {
     }
 
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
-    private void exchangeMoney(Map<Long, Long> requested, UserPrincipal principal) {
+    public void exchangeMoney(Map<Long, Long> requested, UserPrincipal principal) {
         long money = 0;
         for (Long val : requested.keySet()) {
             Long amount = requested.get(val);

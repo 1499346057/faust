@@ -18,27 +18,26 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
 @RunWith(SpringRunner.class)
 public class TreasuryServiceImplUnitTest {
+//    @TestConfiguration
+//    static class TreasuryServiceImplTestContextConfiguration {
+//
+//        @Bean
+//        public TreasuryService treasuryService() {
+//            return new TreasuryServiceImpl();
+//        }
+//    }
 
-    @TestConfiguration
-    static class TreasuryServiceImplTestContextConfiguration {
-
-        @Bean
-        public TreasuryService treasuryService() {
-            return new TreasuryServiceImpl();
-        }
-    }
-
-    @Autowired
+//    @Autowired
+//    public TreasuryServiceImplUnitTest(TreasuryService treasuryService) {
+//        this.treasuryService = treasuryService;
+//    }
     TreasuryService treasuryService;
 
     @MockBean
@@ -52,51 +51,85 @@ public class TreasuryServiceImplUnitTest {
 
     @Before
     public void setUp() {
+        this.treasuryService = new TreasuryServiceImpl(issueRepository, supplyRepository, userRepository, authorityRepository);
         {
-            List<Issue> issues = new ArrayList<Issue>();
+            {
+                Authority authority = new Authority();
+                authority.setName(AuthorityType.ROLE_USER);
+                Mockito.when(authorityRepository.findByName(AuthorityType.ROLE_USER)).thenReturn(Optional.of(authority));
+            }
+            {
+                Authority authority = new Authority();
+                authority.setName(AuthorityType.ROLE_TREASURY);
+                Mockito.when(authorityRepository.findByName(AuthorityType.ROLE_TREASURY)).thenReturn(Optional.of(authority));
+            }
+            {
+                Authority authority = new Authority();
+                authority.setName(AuthorityType.ROLE_SUPPLIER);
+                Mockito.when(authorityRepository.findByName(AuthorityType.ROLE_SUPPLIER)).thenReturn(Optional.of(authority));
+            }
+            {
+                Authority authority = new Authority();
+                authority.setName(AuthorityType.ROLE_EMPEROR);
+                Mockito.when(authorityRepository.findByName(AuthorityType.ROLE_EMPEROR)).thenReturn(Optional.of(authority));
+            }
+            List<Issue> issues = new ArrayList<>();
             {
                 Issue issue = new Issue();
-                issue.setState(IssueState.Approved);
-                issue.setId(5l);
-                List<Paper> papers = new ArrayList<Paper>();
-                papers.add(new Paper(5l, 5l, 10l));
-                papers.add(new Paper(10l, 10l, 25l));
+                issue.setId(5L);
+                List<Paper> papers = new ArrayList<>();
+                papers.add(new Paper(5L, 5L, 10L));
+                papers.add(new Paper(10L, 10L, 25L));
                 papers.add(new Paper(15l, 15l, 50l));
                 issue.setPapers(papers);
                 issues.add(issue);
             }
             Mockito.when(issueRepository.findAll()).thenReturn(issues);
+            Mockito.when(issueRepository.findById(5l)).thenReturn(Optional.ofNullable(issues.get(0)));
         }
     }
 
+    @Test
+    public void whenIssueRequested_IssueReturned() {
+        treasuryService.getIssue(5l);
+        verify(issueRepository).findById(5l);
+    }
 
     @Test
-    public void whenEmperorApprovesIssue_thenFail() {
-        {
-            Authority emperorAuthority = new Authority();
-            emperorAuthority.setName(AuthorityType.ROLE_EMPEROR);
-            Mockito.when(authorityRepository.findByName(AuthorityType.ROLE_EMPEROR)).thenReturn(Optional.of(emperorAuthority));
+    public void whenIssuesRequested_thenIssuesReturned() {
+        treasuryService.getIssues();
+        verify(issueRepository).findAll();
+    }
 
+    @Test
+    public void whenIssueDeleteRequested_thenIssueDeleted() {
+        treasuryService.delIssue(5L);
+        verify(issueRepository).deleteById(5L);
+    }
+
+    @Test
+    public void whenEmperorApprovesIssue_thenIssueBecomesApproved() {
+        Optional<Issue> oissue = issueRepository.findById(5l);
+        Issue issue = new Issue(oissue.get());
+        issue.setState(IssueState.Approved);
+        {
+            Authority emperorAuthority = authorityRepository.findByName(AuthorityType.ROLE_EMPEROR).get();
             User emperor = new User();
             emperor.setAuthorities(Collections.singleton(emperorAuthority));
             Mockito.when(userRepository.getByAuthorities(Collections.singleton(emperorAuthority))).thenReturn(Optional.of(emperor));
         }
-        Issue issue = new Issue();
-        issue.setState(IssueState.Approved);
         Optional<Authority> authority = authorityRepository.findByName(AuthorityType.ROLE_EMPEROR);
         Optional<User> user = userRepository.getByAuthorities(Collections.singleton(authority.get()));
         UserPrincipal userPrincipal = UserPrincipal.create(user.get());
 
         treasuryService.modifyIssue(5l, issue, userPrincipal);
+        verify(issueRepository).save(issue);
     }
 
     @Test(expected = BadRequestException.class)
     public void whenNotEmperorApprovesIssue_thenThrowBadRequestException() {
         {
-            Authority treasuryAuthority = new Authority();
-            treasuryAuthority.setName(AuthorityType.ROLE_TREASURY);
-            Mockito.when(authorityRepository.findByName(AuthorityType.ROLE_TREASURY)).thenReturn(Optional.of(treasuryAuthority));
-
+            Authority treasuryAuthority = authorityRepository.findByName(AuthorityType.ROLE_TREASURY).get();
             User treasury = new User();
             treasury.setAuthorities(Collections.singleton(treasuryAuthority));
             Mockito.when(userRepository.getByAuthorities(Collections.singleton(treasuryAuthority))).thenReturn(Optional.of(treasury));
@@ -114,10 +147,7 @@ public class TreasuryServiceImplUnitTest {
     public void whenNoSupply_thenThrowBadRequestException() {
 
         {
-            Authority treasuryAuthority = new Authority();
-            treasuryAuthority.setName(AuthorityType.ROLE_SUPPLIER);
-            Mockito.when(authorityRepository.findByName(AuthorityType.ROLE_SUPPLIER)).thenReturn(Optional.of(treasuryAuthority));
-
+            Authority treasuryAuthority = authorityRepository.findByName(AuthorityType.ROLE_SUPPLIER).get();
             User treasury = new User();
             treasury.setAuthorities(Collections.singleton(treasuryAuthority));
             Mockito.when(userRepository.getByAuthorities(Collections.singleton(treasuryAuthority))).thenReturn(Optional.of(treasury));
@@ -134,10 +164,7 @@ public class TreasuryServiceImplUnitTest {
     @Test(expected = BadRequestException.class)
     public void whenNoPermissionForSupplies_thenThrowBadRequestException() {
         {
-            Authority treasuryAuthority = new Authority();
-            treasuryAuthority.setName(AuthorityType.ROLE_USER);
-            Mockito.when(authorityRepository.findByName(AuthorityType.ROLE_USER)).thenReturn(Optional.of(treasuryAuthority));
-
+            Authority treasuryAuthority = authorityRepository.findByName(AuthorityType.ROLE_USER).get();
             User treasury = new User();
             treasury.setAuthorities(Collections.singleton(treasuryAuthority));
             Mockito.when(userRepository.getByAuthorities(Collections.singleton(treasuryAuthority))).thenReturn(Optional.of(treasury));
@@ -160,10 +187,7 @@ public class TreasuryServiceImplUnitTest {
     @Test
     public void whenIssueIsApproved_thenMoneyTransferred() {
         {
-            Authority treasuryAuthority = new Authority();
-            treasuryAuthority.setName(AuthorityType.ROLE_TREASURY);
-            Mockito.when(authorityRepository.findByName(AuthorityType.ROLE_TREASURY)).thenReturn(Optional.of(treasuryAuthority));
-
+            Authority treasuryAuthority = authorityRepository.findByName(AuthorityType.ROLE_TREASURY).get();
             User treasury = new User();
             treasury.setMoney(123l);
             treasury.setAuthorities(Collections.singleton(treasuryAuthority));
@@ -186,7 +210,7 @@ public class TreasuryServiceImplUnitTest {
                 Optional<User> user = userRepository.getByAuthorities(Collections.singleton(authority.get()));
                 supply.setOwner(user.get());
             }
-            List<SupplyItem> items = new ArrayList<SupplyItem>();
+            List<SupplyItem> items = new ArrayList<>();
             items.add(new SupplyItem(15l, "Fuu", 123l));
             supply.setItems(items);
             Mockito.when(supplyRepository.findById(666l)).thenReturn(Optional.of(supply));
@@ -213,5 +237,278 @@ public class TreasuryServiceImplUnitTest {
             Optional<User> user = userRepository.getByAuthorities(Collections.singleton(authority.get()));
             assertThat(user.get().getMoney()).isEqualTo(123l);
         }
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void whenUserHasNotEnoughMoney_thenThrowBadRequestException() {
+        UserPrincipal userPrincipal;
+        {
+            Authority treasuryAuthority = authorityRepository.findByName(AuthorityType.ROLE_USER).get();
+            User user = new User();
+            user.setMoney(123l);
+            user.setAuthorities(Collections.singleton(treasuryAuthority));
+            userPrincipal = UserPrincipal.create(user);
+            Mockito.when(userRepository.getByAuthorities(Collections.singleton(treasuryAuthority))).thenReturn(Optional.of(user));
+        }
+        {
+            Authority treasuryAuthority = authorityRepository.findByName(AuthorityType.ROLE_TREASURY).get();
+            User treasury = new User();
+            treasury.setAuthorities(Collections.singleton(treasuryAuthority));
+            Mockito.when(userRepository.getByAuthorities(Collections.singleton(treasuryAuthority))).thenReturn(Optional.of(treasury));
+        }
+        Map<Long, Long> requested = new HashMap<>();
+        requested.put(10L, 50L);
+        treasuryService.MakeExchange(requested, userPrincipal);
+    }
+
+
+    @Test(expected = BadRequestException.class)
+    public void whenTreasuryHasNotEnoughPapers_thenThrowBadRequestException() {
+        UserPrincipal userPrincipal;
+        {
+            Authority treasuryAuthority = authorityRepository.findByName(AuthorityType.ROLE_USER).get();
+            User user = new User();
+            user.setMoney(123l);
+            user.setAuthorities(Collections.singleton(treasuryAuthority));
+            userPrincipal = UserPrincipal.create(user);
+            Mockito.when(userRepository.getByAuthorities(Collections.singleton(treasuryAuthority))).thenReturn(Optional.of(user));
+        }
+        {
+            Authority treasuryAuthority = authorityRepository.findByName(AuthorityType.ROLE_TREASURY).get();
+            User treasury = new User();
+            treasury.setAuthorities(Collections.singleton(treasuryAuthority));
+            Mockito.when(userRepository.getByAuthorities(Collections.singleton(treasuryAuthority))).thenReturn(Optional.of(treasury));
+        }
+        Map<Long, Long> requested = new HashMap<>();
+        requested.put(10L, 10L);
+        treasuryService.MakeExchange(requested, userPrincipal);
+    }
+
+
+    @Test
+    public void whenExchangeCanBePerformed_thenMoneyTransferredToTreasury() {
+        UserPrincipal userPrincipal;
+        User user;
+        {
+            Authority treasuryAuthority = authorityRepository.findByName(AuthorityType.ROLE_USER).get();
+            user = new User();
+            user.setId(666l);
+            user.setMoney(123l);
+            user.setAuthorities(Collections.singleton(treasuryAuthority));
+            user.setExchanges(new HashSet<>());
+            userPrincipal = UserPrincipal.create(user);
+            Mockito.when(userRepository.getByAuthorities(Collections.singleton(treasuryAuthority))).thenReturn(Optional.of(user));
+            Mockito.when(userRepository.getOne(user.getId())).thenReturn(user);
+        }
+        User treasury = new User();
+        {
+            Authority treasuryAuthority = authorityRepository.findByName(AuthorityType.ROLE_TREASURY).get();
+            treasury.setAuthorities(Collections.singleton(treasuryAuthority));
+            Mockito.when(userRepository.getByAuthorities(Collections.singleton(treasuryAuthority))).thenReturn(Optional.of(treasury));
+        }
+        {
+            Issue issue = issueRepository.findById(5L).get();
+            issue.setState(IssueState.Approved);
+            Mockito.when(issueRepository.findById(5L)).thenReturn(Optional.of(issue));
+        }
+        Map<Long, Long> requested = new HashMap<>();
+        requested.put(10L, 5L);
+        treasuryService.MakeExchange(requested, userPrincipal);
+        user.setMoney(user.getMoney() - 50);
+        Exchange exchange = new Exchange();
+        exchange.setPapers(Collections.singletonList(new Paper(20L, 5L, 5L, 10L)));
+        Set<Exchange> exchanges = user.getExchanges();
+        exchanges.add(exchange);
+        verify(userRepository).save(user);
+
+        treasury.setMoney(treasury.getMoney() + 50L);
+        verify(userRepository).save(treasury);
+
+        Optional<Issue> oissue = issueRepository.findById(5L);
+        Issue issue = new Issue(oissue.get());
+        List<Paper> papers = new ArrayList<>();
+        papers.add(new Paper(0l, 5l, 10l));
+        papers.add(new Paper(10l, 10l, 25l));
+        papers.add(new Paper(15l, 15l, 50l));
+        issue.setPapers(papers);
+        verify(issueRepository).save(issue);
+    }
+
+    @Test
+    public void whenSupplyIsRequested_thenItsReturned() {
+        {
+            Authority treasuryAuthority = authorityRepository.findByName(AuthorityType.ROLE_TREASURY).get();
+            User treasury = new User();
+            treasury.setMoney(123l);
+            treasury.setAuthorities(Collections.singleton(treasuryAuthority));
+            Mockito.when(userRepository.getByAuthorities(Collections.singleton(treasuryAuthority))).thenReturn(Optional.of(treasury));
+        }
+        {
+            Authority treasuryAuthority = new Authority();
+            treasuryAuthority.setName(AuthorityType.ROLE_SUPPLIER);
+            Mockito.when(authorityRepository.findByName(AuthorityType.ROLE_SUPPLIER)).thenReturn(Optional.of(treasuryAuthority));
+
+            User treasury = new User();
+            treasury.setId(555l);
+            treasury.setAuthorities(Collections.singleton(treasuryAuthority));
+            Mockito.when(userRepository.getByAuthorities(Collections.singleton(treasuryAuthority))).thenReturn(Optional.of(treasury));
+        }
+        Supply supply = new Supply();
+        UserPrincipal userPrincipal;
+        {
+            supply.setId(666l);
+            {
+                Optional<Authority> authority = authorityRepository.findByName(AuthorityType.ROLE_SUPPLIER);
+                Optional<User> user = userRepository.getByAuthorities(Collections.singleton(authority.get()));
+                supply.setOwner(user.get());
+                userPrincipal = UserPrincipal.create(user.get());
+            }
+            List<SupplyItem> items = new ArrayList<>();
+            items.add(new SupplyItem(15l, "Fuu", 123l));
+            supply.setItems(items);
+            Mockito.when(supplyRepository.findById(666l)).thenReturn(Optional.of(supply));
+        }
+
+        treasuryService.GetSupply(666l, userPrincipal);
+        verify(supplyRepository).findById(666l);
+    }
+
+
+    @Test(expected = BadRequestException.class)
+    public void whenNotEnoughPermissionsToRequestSupply_thenThrowBadRequestException() {
+        {
+            Authority treasuryAuthority = authorityRepository.findByName(AuthorityType.ROLE_TREASURY).get();
+            User treasury = new User();
+            treasury.setMoney(123l);
+            treasury.setAuthorities(Collections.singleton(treasuryAuthority));
+            Mockito.when(userRepository.getByAuthorities(Collections.singleton(treasuryAuthority))).thenReturn(Optional.of(treasury));
+        }
+        {
+            Authority treasuryAuthority = new Authority();
+            treasuryAuthority.setName(AuthorityType.ROLE_SUPPLIER);
+            Mockito.when(authorityRepository.findByName(AuthorityType.ROLE_SUPPLIER)).thenReturn(Optional.of(treasuryAuthority));
+
+            User treasury = new User();
+            treasury.setId(555l);
+            treasury.setAuthorities(Collections.singleton(treasuryAuthority));
+            Mockito.when(userRepository.getByAuthorities(Collections.singleton(treasuryAuthority))).thenReturn(Optional.of(treasury));
+        }
+        Supply supply = new Supply();
+        UserPrincipal userPrincipal;
+        {
+            supply.setId(666l);
+            {
+                Optional<Authority> authority = authorityRepository.findByName(AuthorityType.ROLE_SUPPLIER);
+                Optional<User> user = userRepository.getByAuthorities(Collections.singleton(authority.get()));
+                userPrincipal = UserPrincipal.create(user.get());
+                user.get().setId(777l);
+                supply.setOwner(user.get());
+            }
+            List<SupplyItem> items = new ArrayList<>();
+            items.add(new SupplyItem(15l, "Fuu", 123l));
+            supply.setItems(items);
+            Mockito.when(supplyRepository.findById(666l)).thenReturn(Optional.of(supply));
+        }
+
+        treasuryService.GetSupply(666l, userPrincipal);
+    }
+
+    @Test
+    public void whenSupplyDeleteRequested_thenItsReturned() {
+        {
+            Authority treasuryAuthority = authorityRepository.findByName(AuthorityType.ROLE_TREASURY).get();
+            User treasury = new User();
+            treasury.setMoney(123l);
+            treasury.setAuthorities(Collections.singleton(treasuryAuthority));
+            Mockito.when(userRepository.getByAuthorities(Collections.singleton(treasuryAuthority))).thenReturn(Optional.of(treasury));
+        }
+        {
+            Authority treasuryAuthority = new Authority();
+            treasuryAuthority.setName(AuthorityType.ROLE_SUPPLIER);
+            Mockito.when(authorityRepository.findByName(AuthorityType.ROLE_SUPPLIER)).thenReturn(Optional.of(treasuryAuthority));
+
+            User treasury = new User();
+            treasury.setId(555l);
+            treasury.setAuthorities(Collections.singleton(treasuryAuthority));
+            Mockito.when(userRepository.getByAuthorities(Collections.singleton(treasuryAuthority))).thenReturn(Optional.of(treasury));
+        }
+        Supply supply = new Supply();
+        UserPrincipal userPrincipal;
+        {
+            supply.setId(666l);
+            {
+                Optional<Authority> authority = authorityRepository.findByName(AuthorityType.ROLE_SUPPLIER);
+                Optional<User> user = userRepository.getByAuthorities(Collections.singleton(authority.get()));
+                supply.setOwner(user.get());
+                userPrincipal = UserPrincipal.create(user.get());
+            }
+            List<SupplyItem> items = new ArrayList<>();
+            items.add(new SupplyItem(15l, "Fuu", 123l));
+            supply.setItems(items);
+            Mockito.when(supplyRepository.findById(666l)).thenReturn(Optional.of(supply));
+        }
+
+        treasuryService.DeleteSupply(666l, userPrincipal);
+        verify(supplyRepository).findById(666l);
+        verify(supplyRepository).deleteById(666l);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void whenNotEnoughPermissionsToDeleteSupply_thenThrowBadRequestException() {
+        {
+            Authority treasuryAuthority = authorityRepository.findByName(AuthorityType.ROLE_TREASURY).get();
+            User treasury = new User();
+            treasury.setMoney(123l);
+            treasury.setAuthorities(Collections.singleton(treasuryAuthority));
+            Mockito.when(userRepository.getByAuthorities(Collections.singleton(treasuryAuthority))).thenReturn(Optional.of(treasury));
+        }
+        {
+            Authority treasuryAuthority = new Authority();
+            treasuryAuthority.setName(AuthorityType.ROLE_SUPPLIER);
+            Mockito.when(authorityRepository.findByName(AuthorityType.ROLE_SUPPLIER)).thenReturn(Optional.of(treasuryAuthority));
+
+            User treasury = new User();
+            treasury.setId(555l);
+            treasury.setAuthorities(Collections.singleton(treasuryAuthority));
+            Mockito.when(userRepository.getByAuthorities(Collections.singleton(treasuryAuthority))).thenReturn(Optional.of(treasury));
+        }
+        Supply supply = new Supply();
+        UserPrincipal userPrincipal;
+        {
+            supply.setId(666l);
+            {
+                Optional<Authority> authority = authorityRepository.findByName(AuthorityType.ROLE_SUPPLIER);
+                Optional<User> user = userRepository.getByAuthorities(Collections.singleton(authority.get()));
+                userPrincipal = UserPrincipal.create(user.get());
+                user.get().setId(777l);
+                supply.setOwner(user.get());
+            }
+            List<SupplyItem> items = new ArrayList<>();
+            items.add(new SupplyItem(15l, "Fuu", 123l));
+            supply.setItems(items);
+            Mockito.when(supplyRepository.findById(666l)).thenReturn(Optional.of(supply));
+        }
+
+        treasuryService.DeleteSupply(666l, userPrincipal);
+    }
+
+
+    @Test
+    public void whenAllSuppliesRequested_thenSuppliesReturned() {
+        UserPrincipal userPrincipal;
+        {
+            Authority supplierAuthority = new Authority();
+            supplierAuthority.setName(AuthorityType.ROLE_SUPPLIER);
+            Mockito.when(authorityRepository.findByName(AuthorityType.ROLE_SUPPLIER)).thenReturn(Optional.of(supplierAuthority));
+
+            User supplier = new User();
+            supplier.setId(555l);
+            userPrincipal = UserPrincipal.create(supplier);
+            supplier.setAuthorities(Collections.singleton(supplierAuthority));
+            Mockito.when(userRepository.getByAuthorities(Collections.singleton(supplierAuthority))).thenReturn(Optional.of(supplier));
+        }
+
+        treasuryService.GetAllSupplies(userPrincipal);
+        verify(supplyRepository).findByOwnerId(userPrincipal.getId());
     }
 }

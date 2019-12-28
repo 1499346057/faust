@@ -22,4 +22,10 @@ public class Issue {
 
     @OneToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
     private List<Paper> papers;
+
+    public Issue(Issue issue) {
+        this.id = issue.getId();
+        this.state = issue.getState();
+        this.papers = issue.getPapers();
+    }
 }

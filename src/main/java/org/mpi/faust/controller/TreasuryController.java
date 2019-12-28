@@ -66,22 +66,22 @@ public class TreasuryController {
 
     @GetMapping("/supplies")
     @PreAuthorize("hasRole('ROLE_TREASURY') or hasRole('ROLE_SUPPLIER')")
-    Collection<Supply> GetAllSupplies(){
-        return treasuryService.GetAllSupplies();
+    Collection<Supply> GetAllSupplies(@CurrentUser UserPrincipal principal){
+        return treasuryService.GetAllSupplies(principal);
     }
 
     @GetMapping("/supplies/{id}")
     @PreAuthorize("hasRole('ROLE_TREASURY') or hasRole('ROLE_SUPPLIER')")
-    ResponseEntity<?> GetSupply(@PathVariable Long id){
-        Optional<Supply> issue = treasuryService.GetSupply(id);
+    ResponseEntity<?> GetSupply(@PathVariable Long id, @CurrentUser UserPrincipal principal){
+        Optional<Supply> issue = treasuryService.GetSupply(id, principal);
         return issue.map(response -> ok().body(response))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @DeleteMapping("/supplies/{id}")
     @PreAuthorize("hasRole('ROLE_TREASURY') or hasRole('ROLE_SUPPLIER')")
-    ResponseEntity DeleteSupply(@PathVariable Long id){
-        treasuryService.DeleteSupply(id);
+    ResponseEntity DeleteSupply(@PathVariable Long id, @CurrentUser UserPrincipal principal){
+        treasuryService.DeleteSupply(id, principal);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
