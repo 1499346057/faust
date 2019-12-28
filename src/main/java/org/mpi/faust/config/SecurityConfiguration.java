@@ -5,7 +5,9 @@ import org.mpi.faust.security.JwtAuthenticationEntryPoint;
 import org.mpi.faust.security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
@@ -22,6 +24,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+//@ComponentScan({"org.mpi.faust.security", "org.mpi.faust.service"})
+//@EnableJpaRepositories("org.mpi.faust.repository")
 @EnableGlobalMethodSecurity(
         securedEnabled = true,
         jsr250Enabled = true,
