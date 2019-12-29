@@ -1,7 +1,10 @@
 package org.mpi.faust.dto;
 
+import lombok.*;
+
 import javax.validation.constraints.NotBlank;
 
+@Data
 public class LoginRequest {
     @NotBlank
     private String username;
@@ -14,19 +17,4 @@ public class LoginRequest {
         this.password = password;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String usernameOrEmail) {
-        this.username = usernameOrEmail;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }
