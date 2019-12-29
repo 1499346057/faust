@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {Button, Container, Form, FormGroup, Input, Label, Table} from 'reactstrap';
-import {createIssue, getIssue} from "../util/APIUtils";
+import {createIssue, getIssue, putIssue} from "../util/APIUtils";
 import {NotificationManager} from "react-notifications";
 
 class IssueEdit extends Component {
@@ -20,7 +20,7 @@ class IssueEdit extends Component {
         this.handleAdd = this.handleAdd.bind(this);
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         if (this.props.match.params.id !== 'new') {
             getIssue(this.props.match.params.id).then(issue => {
                 this.setState({item: issue});
@@ -30,10 +30,10 @@ class IssueEdit extends Component {
         }
     }
 
-    handleAdd(event) {
+    async handleAdd(event) {
         const paper = this.state.paper;
         const papers = this.state.item.papers;
-        if (paper.value == undefined) {
+        if (paper.value === undefined) {
             paper.value = 1;
         }
 
@@ -44,7 +44,7 @@ class IssueEdit extends Component {
         this.setState(item);
     }
 
-    handleChange(event) {
+    async handleChange(event) {
         const target = event.target;
         const value = target.value;
         const name = target.name;
@@ -57,7 +57,12 @@ class IssueEdit extends Component {
         event.preventDefault();
         const {item,} = this.state;
 
-        await createIssue(item);
+        if (item.id === undefined) {
+            await createIssue(item);
+        }
+        else {
+            await putIssue(item);
+        }
         this.props.history.push('/issues');
     }
 
@@ -94,7 +99,7 @@ class IssueEdit extends Component {
                             </Input>
                         </FormGroup>
                         <FormGroup className="col-md-4 mb-3">
-                            <Button color="primary" onClick={this.handleAdd}>Add</Button>{' '}
+                            <Button color="primary" id="rowAddButton" onClick={this.handleAdd}>Add</Button>{' '}
                         </FormGroup>
                     </div>
                 </Form>
@@ -109,7 +114,7 @@ class IssueEdit extends Component {
                     {paperList}
                     </tbody>
                 </Table>
-                <Button color="primary" onClick={this.handleSubmit}>Commit</Button>{' '}
+                <Button color="primary" id="submitButton" onClick={this.handleSubmit}>Commit</Button>{' '}
             </Container>
         </div>
     }

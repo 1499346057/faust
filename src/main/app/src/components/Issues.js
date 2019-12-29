@@ -13,9 +13,11 @@ class Issues extends Component {
     }
 
 
-    componentDidMount() {
+    async componentDidMount() {
         getIssues()
-            .then(data => this.setState({issues: data}))
+            .then(data => {
+                this.setState({issues: data})
+            })
             .catch(error => {
                 redirectHandler.call(this, error);
             });
@@ -45,9 +47,9 @@ class Issues extends Component {
                 <td>{issue.state}</td>
                 <td>
                     <ButtonGroup>
-                        {isEmperor && issue.state === "New" ?<Button size="sm" color="success" onClick={() => this.handleApprove(issue)}>Approve</Button>:""}
-                        {isTreasury && issue.state === "New" ?<Button size="sm" color="success" tag={Link} to={"/issues/" + issue.id}>Edit</Button>:""}
-                        <Button size="sm" color="danger" onClick={() => this.remove(issue.id)}>Delete</Button>
+                        {isEmperor && issue.state === "New" ?<Button size="sm" color="success" id="approveButton" onClick={() => this.handleApprove(issue)}>Approve</Button>:""}
+                        {isTreasury && issue.state === "New" ?<Button size="sm" color="success" id="editButton" tag={Link} to={"/issues/" + issue.id}>Edit</Button>:""}
+                        <Button size="sm" color="danger" id='deleteButton' onClick={() => this.remove(issue.id)}>Delete</Button>
                     </ButtonGroup>
                 </td>
             </tr>
@@ -63,7 +65,7 @@ class Issues extends Component {
                         :''
                     }
                     <h3>Issue management</h3>
-                    <Table className="mt-4">
+                    <Table className="mt-4" id="issueTable">
                         <thead>
                         <tr>
                             <th width="20%">value</th>

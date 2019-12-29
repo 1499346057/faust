@@ -12,6 +12,7 @@ import org.mpi.faust.repository.UserRepository;
 import org.mpi.faust.security.UserPrincipal;
 import org.mpi.faust.service.TreasuryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -55,6 +56,9 @@ public class TreasuryServiceImpl implements TreasuryService {
     }
 
     public Issue createIssue(Issue issue) {
+        if (issue.getId() != null) {
+            throw new BadRequestException("Issue must have no identifier");
+        }
         Issue result = issueRepository.save(issue);
         return result;
     }

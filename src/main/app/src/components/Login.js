@@ -2,10 +2,9 @@ import React from "react";
 import {Button, Col, Container, Form, FormGroup, Input, Label} from "reactstrap";
 import {login} from "../util/APIUtils";
 import {ACCESS_TOKEN} from "../constants";
-import {Spinner} from 'reactstrap';
 import {NotificationManager} from 'react-notifications';
 
-class Login extends React.Component{
+class Login extends React.Component {
 
     constructor(props) {
         super(props);
@@ -29,19 +28,19 @@ class Login extends React.Component{
     }
 
     handleSubmit() {
-        this.setState({ isLoading: true });
+        this.setState({isLoading: true});
         const body = {
             username: this.state.username,
             password: this.state.password
         };
         login(body)
             .then(response => {
-                this.setState({ isLoading: false });
+                this.setState({isLoading: false});
                 localStorage.setItem(ACCESS_TOKEN, response.accessToken);
                 this.props.onLogin();
             }).catch(error => {
-            this.setState({ isLoading: false });
-            if(error.status === 401) {
+            this.setState({isLoading: false});
+            if (error.status === 401) {
                 NotificationManager.error('Treasury App', 'Your username or password is incorrect. Please try again!');
             } else {
                 NotificationManager.error('Treasury App err', error.message || 'Sorry! Something went wrong. Please try again!');
@@ -77,9 +76,9 @@ class Login extends React.Component{
                             />
                         </FormGroup>
                     </Col>
-                    <Button onClick={this.handleSubmit}>Submit</Button>
-            </Form>
-        </Container>
+                    <Button id="loginButton" onClick={this.handleSubmit}>Submit</Button>
+                </Form>
+            </Container>
         );
     }
 }

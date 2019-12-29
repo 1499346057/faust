@@ -5,6 +5,8 @@
   "dependencies": {
     "axios": "^0.19.0",
     "bootstrap": "^4.3.1",
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-react-16": "^1.15.2",
     "primeicons": "^1.0.0",
     "primereact": "^3.1.4",
     "react": "^16.8.6",

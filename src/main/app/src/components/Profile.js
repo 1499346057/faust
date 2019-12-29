@@ -9,7 +9,7 @@ class Profile extends Component {
         this.state = {currentUser: {}, profile: {}, exchanges: [], isLoading: true};
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         getCurrentUser()
             .then(response => {
                 this.setState({
