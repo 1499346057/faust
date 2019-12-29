@@ -20,7 +20,7 @@ class SupplyEdit extends Component {
         this.handleAdd = this.handleAdd.bind(this);
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         if (this.props.match.params.id !== 'new') {
             getSupplies(this.props.match.params.id).then(supply => {
                 this.setState({item: supply});
@@ -84,7 +84,7 @@ class SupplyEdit extends Component {
                                    onChange={this.handleChange} type="number" autoComplete="address-level1"/>
                         </FormGroup>
                         <FormGroup className="col-md-4 mb-3">
-                            <Button color="primary" onClick={this.handleAdd}>Add</Button>{' '}
+                            <Button color="primary" id='rowAddButton' onClick={this.handleAdd}>Add</Button>{' '}
                         </FormGroup>
                     </div>
                 </Form>
@@ -99,7 +99,7 @@ class SupplyEdit extends Component {
                     {positionList}
                     </tbody>
                 </Table>
-                <Button color="primary" onClick={this.handleSubmit}>Commit</Button>{' '}
+                <Button color="primary" id='submitButton' onClick={this.handleSubmit}>Commit</Button>{' '}
             </Container>
         </div>
     }

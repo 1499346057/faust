@@ -15,7 +15,7 @@ class Supplies extends Component {
     }
 
 
-    componentDidMount() {
+    async componentDidMount() {
         getSupplies()
             .then(data => {
                 this.setState({supplies: data});
@@ -49,8 +49,8 @@ class Supplies extends Component {
                 <td>{supply.status}</td>
                 <td>
                     <ButtonGroup>
-                        {isTreasury && supply.status === "New" ?<Button size="sm" color="success" onClick={() => this.handleApprove(supply)}>Approve</Button>:""}
-                        <Button size="sm" color="danger" onClick={() => this.remove(supply.id)}>Delete</Button>
+                        {isTreasury && supply.status === "New" ?<Button id="approveButton" size="sm" color="success" onClick={() => this.handleApprove(supply)}>Approve</Button>:""}
+                        <Button size="sm" color="danger" id='deleteButton' onClick={() => this.remove(supply.id)}>Delete</Button>
                     </ButtonGroup>
                 </td>
             </tr>
