@@ -28,7 +28,7 @@ class Exchange extends Component {
     async handleSubmit(event) {
         event.preventDefault();
 
-        makeExchange(this.state.amount).then(() => {
+        makeExchange(this.state.res).then(() => {
             NotificationManager.success('Treasury App', 'Exchange succeeded!');
             this.props.history.push('/profile');
         }).catch((error) => {
