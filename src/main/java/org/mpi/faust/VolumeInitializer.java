@@ -3,6 +3,7 @@ package org.mpi.faust;
 import org.mpi.faust.exception.AppException;
 import org.mpi.faust.model.*;
 import org.mpi.faust.repository.AuthorityRepository;
+import org.mpi.faust.repository.IssueRepository;
 import org.mpi.faust.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -24,10 +25,12 @@ class VolumeInitializer implements CommandLineRunner {
     private final UserRepository userRepository;
 
     private final AuthorityRepository authorityRepository;
+    private IssueRepository issueRepository;
 
-    public VolumeInitializer(UserRepository user_repository, AuthorityRepository authorityRepository) {
+    public VolumeInitializer(UserRepository user_repository, AuthorityRepository authorityRepository, IssueRepository issueRepository) {
         this.userRepository = user_repository;
         this.authorityRepository = authorityRepository;
+        this.issueRepository = issueRepository;
     }
 
     @Override
@@ -77,9 +80,10 @@ class VolumeInitializer implements CommandLineRunner {
 
         userRepository.saveAll(users);
 
-        for (long i = 0; i < 1000; i++) {
+        for (long i = 0; i < 20000; i++) {
             Issue issue = new Issue();
             issue.setState(IssueState.New);
+            issueRepository.saveAndFlush(issue);
         }
     }
 }
