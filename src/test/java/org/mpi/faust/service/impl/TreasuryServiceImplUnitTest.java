@@ -1,6 +1,7 @@
 package org.mpi.faust.service.impl;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -145,7 +146,6 @@ public class TreasuryServiceImplUnitTest {
 
     @Test(expected = BadRequestException.class)
     public void whenNoSupply_thenThrowBadRequestException() {
-
         {
             Authority treasuryAuthority = authorityRepository.findByName(AuthorityType.ROLE_SUPPLIER).get();
             User treasury = new User();
@@ -439,6 +439,7 @@ public class TreasuryServiceImplUnitTest {
             {
                 Optional<Authority> authority = authorityRepository.findByName(AuthorityType.ROLE_SUPPLIER);
                 Optional<User> user = userRepository.getByAuthorities(Collections.singleton(authority.get()));
+                user.get().setId(555l);
                 supply.setOwner(user.get());
                 userPrincipal = UserPrincipal.create(user.get());
             }
@@ -480,8 +481,11 @@ public class TreasuryServiceImplUnitTest {
                 Optional<Authority> authority = authorityRepository.findByName(AuthorityType.ROLE_SUPPLIER);
                 Optional<User> user = userRepository.getByAuthorities(Collections.singleton(authority.get()));
                 userPrincipal = UserPrincipal.create(user.get());
-                user.get().setId(777l);
-                supply.setOwner(user.get());
+            }
+            {
+                User unrelatedUser = new User();
+                unrelatedUser.setId(999L);
+                supply.setOwner(unrelatedUser);
             }
             List<SupplyItem> items = new ArrayList<>();
             items.add(new SupplyItem(15l, "Fuu", 123l));

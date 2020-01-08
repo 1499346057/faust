@@ -15,7 +15,7 @@
     "react-icons": "^3.8.0",
     "react-notifications": "^1.4.3",
     "react-router-dom": "4.3.1",
-    "react-scripts": "3.0.1",
+    "react-scripts": "3.1.1",
     "react-test-renderer": "^16.8.6",
     "react-validation": "^3.0.7",
     "reactstrap": "^8.0.1",
@@ -46,8 +46,6 @@
   "devDependencies": {
     "@testing-library/react": "^9.4.0",
     "faker": "^4.1.0",
-    "jest": "^24.7.1",
-    "jest-cli": "^24.7.1",
     "puppeteer": "^2.0.0"
   }
 }

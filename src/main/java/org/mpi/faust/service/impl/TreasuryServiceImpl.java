@@ -75,6 +75,9 @@ public class TreasuryServiceImpl implements TreasuryService {
 
 
     public Collection<Supply> GetAllSupplies(UserPrincipal userPrincipal) {
+        if (checkUSerForRole(userPrincipal, "ROLE_TREASURY")) {
+            return supplyRepository.findAll();
+        }
         return supplyRepository.findByOwnerId(userPrincipal.getId());
     }
 
@@ -88,8 +91,8 @@ public class TreasuryServiceImpl implements TreasuryService {
 
     public void DeleteSupply(Long id, UserPrincipal principal) {
         Optional<Supply> supply = supplyRepository.findById(id);
-        if (!supply.get().getOwner().getId().equals(principal.getId())) {
-            throw new BadRequestException("Not enough permissions to get supply");
+        if (!supply.get().getOwner().getId().equals(principal.getId()) && !checkUSerForRole(principal, "ROLE_TREASURY")) {
+            throw new BadRequestException("Not enough permissions to remove supply");
         }
 
         supplyRepository.deleteById(id);
