@@ -16,8 +16,8 @@ import java.util.stream.Stream;
 
 
 //@Component
-@Profile("volume")
-class VolumeInitializer implements CommandLineRunner {
+@Profile("load")
+class LoadInitializer implements CommandLineRunner {
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -27,7 +27,7 @@ class VolumeInitializer implements CommandLineRunner {
     private final AuthorityRepository authorityRepository;
     private IssueRepository issueRepository;
 
-    public VolumeInitializer(UserRepository user_repository, AuthorityRepository authorityRepository, IssueRepository issueRepository) {
+    public LoadInitializer(UserRepository user_repository, AuthorityRepository authorityRepository, IssueRepository issueRepository) {
         this.userRepository = user_repository;
         this.authorityRepository = authorityRepository;
         this.issueRepository = issueRepository;
@@ -80,7 +80,7 @@ class VolumeInitializer implements CommandLineRunner {
 
         userRepository.saveAll(users);
 
-        for (long i = 0; i < 100000; i++) {
+        for (long i = 0; i < 1000; i++) {
             Issue issue = new Issue();
             issue.setState(IssueState.New);
             issueRepository.saveAndFlush(issue);
